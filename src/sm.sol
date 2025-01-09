@@ -1,134 +1,166 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract FreelanceJobSystem {
+// Payment will be in APE coin and the platform will operate on ApeChain.
+// The Platform FEE will be 0.5%, and 0.5% of the amount of each Gas fee will be charged to the platform's wallet as a commission.
+// Only the employer can change the status of the job offer, and when the job offer status is changed to successful, the payment for the job that was transferred to the admin account will be transferred to the employee. In doing so, a 0.5% commission will be charged.
+
+interface IERC20 {
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
+
+    function balanceOf(address account) external view returns (uint256);
+}
+
+contract ApeLance {
     address public owner;
-    uint256 public feePercent; // Platform fee percentage
+    uint256 public platformFee; // Platform fee percentage (0.5%)
+    IERC20 public apeToken; // APE token contract address
 
-    struct Job {
-        uint256 id;
-        address employer;
-        string description;
-        uint256 payment;
-        bool isActive;
-        bool isCompleted;
+    enum JobStatus {
+        Assigned,
+        Completed,
+        Cancelled,
+        Paid
     }
 
-    struct Offer {
-        uint256 id;
-        address freelancer;
-        uint256 jobId;
-        uint256 offerAmount;
-        bool isAccepted;
-    }
-
-    uint256 public nextJobId;
-    uint256 public nextOfferId;
-
-    mapping(uint256 => Job) public jobs;
-    mapping(uint256 => Offer) public offers;
-    mapping(uint256 => uint256[]) public jobOffers; // Job ID to offer IDs
-    mapping(address => uint256) public balances; // Freelancer balances
-
-    event JobPosted(uint256 jobId, address employer, uint256 payment);
-    event OfferMade(uint256 offerId, uint256 jobId, address freelancer, uint256 offerAmount);
-    event OfferAccepted(uint256 offerId, uint256 jobId, address freelancer);
-    event JobCompleted(uint256 jobId, address freelancer, uint256 payment);
-
-    constructor(uint256 _feePercent) {
-        owner = msg.sender;
-        feePercent = _feePercent;
+    enum WorkStatus {
+        Doing,
+        Completed,
+        Cancelled,
+        Paid
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not authorized");
+        require(msg.sender == owner, 'Not authorized');
         _;
     }
 
-    modifier onlyEmployer(uint256 jobId) {
-        require(jobs[jobId].employer == msg.sender, "Not the employer");
-        _;
+    struct AcceptedOfferJob {
+        uint id;
+        string web2JobId;
+        string hashedJob;
+        address jobCreater;
+        address freelancer;
+        uint256 offerAmount;
+        JobStatus status;
+        WorkStatus workStatus;
     }
 
-    modifier jobExists(uint256 jobId) {
-        require(jobs[jobId].id == jobId, "Job does not exist");
-        _;
+    uint256 public offerId;
+
+    mapping(uint256 => AcceptedOfferJob) public acceptedOffer;
+
+    event OfferAccepted(
+        uint256 indexed offerId,
+        string web2JobId,
+        address indexed jobCreater,
+        uint256 offerAmount
+    );
+    event JobStatusUpdated(
+        uint256 indexed offerId,
+        JobStatus status,
+        WorkStatus workStatus
+    );
+    event PaymentTransferred(
+        uint256 indexed offerId,
+        address indexed freelancer,
+        uint256 amount
+    );
+    event AdminTransfer(address indexed recipient, uint256 amount);
+
+    constructor(uint256 _platformFee, address _apeToken) {
+        owner = msg.sender; // Admin's wallet
+        platformFee = _platformFee; // Platform fee percentage
+        apeToken = IERC20(_apeToken); // Set APE token contract address
     }
 
-    modifier offerExists(uint256 offerId) {
-        require(offers[offerId].id == offerId, "Offer does not exist");
-        _;
+    // With this action, the employer is requested to withdraw the amount of the work to the admin account.
+    // Accepts an offer and locks the APE amount in the contract
+    function acceptOffer(
+        string memory web2JobId,
+        string memory hashedJob,
+        uint256 amount
+    ) external {
+        require(amount > 0, 'Payment required to post a job');
+        require(
+            apeToken.transferFrom(msg.sender, address(this), amount),
+            'Payment transfer failed'
+        );
+
+        offerId++;
+        acceptedOffer[offerId] = AcceptedOfferJob({
+            id: offerId,
+            web2JobId: web2JobId,
+            hashedJob: hashedJob,
+            jobCreater: msg.sender,
+            freelancer: address(0),
+            offerAmount: amount,
+            status: JobStatus.Assigned,
+            workStatus: WorkStatus.Doing
+        });
+
+        emit OfferAccepted(offerId, web2JobId, msg.sender, amount);
     }
 
-    function postJob(string memory description) external payable {
-        require(msg.value > 0, "Payment required to post job");
+    // Updates the job status and transfers payment when job is completed
+    function updateJobStatus(
+        uint256 _offerId,
+        JobStatus newStatus,
+        address freelancer
+    ) external {
+        AcceptedOfferJob storage job = acceptedOffer[_offerId];
+        require(
+            msg.sender == job.jobCreater,
+            'Only the job creator can update status'
+        );
+        require(
+            job.status == JobStatus.Assigned,
+            'Job not in a modifiable state'
+        );
+        require(newStatus == JobStatus.Completed, 'Invalid status update');
 
-        uint256 jobId = nextJobId++;
-        jobs[jobId] = Job(jobId, msg.sender, description, msg.value, true, false);
+        job.status = newStatus;
+        job.workStatus = WorkStatus.Completed;
+        job.freelancer = freelancer;
 
-        emit JobPosted(jobId, msg.sender, msg.value);
+        // Calculate platform fee and transfer remaining amount to freelancer
+        uint256 commission = (job.offerAmount * platformFee) / 10000; // 0.5% = 50/10000
+        uint256 paymentToFreelancer = job.offerAmount - commission;
+
+        require(
+            apeToken.transfer(owner, commission),
+            'Platform commission transfer failed'
+        );
+        require(
+            apeToken.transfer(freelancer, paymentToFreelancer),
+            'Payment to freelancer failed'
+        );
+
+        emit JobStatusUpdated(_offerId, newStatus, WorkStatus.Completed);
+        emit PaymentTransferred(_offerId, freelancer, paymentToFreelancer);
     }
 
-    function makeOffer(uint256 jobId, uint256 offerAmount) external jobExists(jobId) {
-        require(jobs[jobId].isActive, "Job is not active");
+    // Allows the admin to manually transfer funds
+    function adminTransfer(
+        address recipient,
+        uint256 amount
+    ) external onlyOwner {
+        require(amount > 0, 'Amount must be greater than zero');
+        require(apeToken.transfer(recipient, amount), 'Transfer failed');
 
-        uint256 offerId = nextOfferId++;
-        offers[offerId] = Offer(offerId, msg.sender, jobId, offerAmount, false);
-        jobOffers[jobId].push(offerId);
-
-        emit OfferMade(offerId, jobId, msg.sender, offerAmount);
-    }
-
-    function acceptOffer(uint256 offerId) external offerExists(offerId) onlyEmployer(offers[offerId].jobId) {
-        Offer storage offer = offers[offerId];
-        require(!offer.isAccepted, "Offer already accepted");
-
-        offer.isAccepted = true;
-        jobs[offer.jobId].isActive = false;
-
-        emit OfferAccepted(offerId, offer.jobId, offer.freelancer);
-    }
-
-    function completeJob(uint256 jobId) external jobExists(jobId) onlyEmployer(jobId) {
-        Job storage job = jobs[jobId];
-        require(!job.isCompleted, "Job already completed");
-
-        uint256 offerId = getAcceptedOffer(jobId);
-        require(offerId != type(uint256).max, "No accepted offer found");
-
-        Offer storage offer = offers[offerId];
-        uint256 fee = (job.payment * feePercent) / 100;
-        uint256 paymentToFreelancer = job.payment - fee;
-
-        balances[offer.freelancer] += paymentToFreelancer;
-        job.isCompleted = true;
-
-        emit JobCompleted(jobId, offer.freelancer, paymentToFreelancer);
-    }
-
-    function withdrawBalance() external {
-        uint256 balance = balances[msg.sender];
-        require(balance > 0, "No balance to withdraw");
-
-        balances[msg.sender] = 0;
-        payable(msg.sender).transfer(balance);
-    }
-
-    function getAcceptedOffer(uint256 jobId) public view jobExists(jobId) returns (uint256) {
-        uint256[] memory offerIds = jobOffers[jobId];
-        for (uint256 i = 0; i < offerIds.length; i++) {
-            if (offers[offerIds[i]].isAccepted) {
-                return offerIds[i];
-            }
-        }
-        return type(uint256).max; // No accepted offer
+        emit AdminTransfer(recipient, amount);
     }
 
     function updateFeePercent(uint256 _feePercent) external onlyOwner {
-        feePercent = _feePercent;
-    }
-
-    function withdrawPlatformFees() external onlyOwner {
-        payable(owner).transfer(address(this).balance);
+        platformFee = _feePercent;
     }
 }
