@@ -4,15 +4,21 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   const config = new DocumentBuilder()
-    .setTitle('Client')
-    .setDescription('The Client API description')
     .addBearerAuth()
+    .setTitle('Apelance')
+    .setDescription('The Apelance API description')
     .setVersion('1.0')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+    },
+  });
   await app.listen(3000);
 }
 bootstrap();

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { JobInput } from './dto/create-job.dto';
 import { Job } from './entities/jobs.entity';
 
 @Injectable()
@@ -10,10 +11,10 @@ export class JobsService {
     private jobModel: Model<Job>,
   ) {}
 
-  async createJob(dto: any) {
+  async createJob(web3address: string, dto: JobInput) {
     const job = new this.jobModel({
-      description: 'ene ih goy ajil shu sda min',
-      owner: '',
+      client: web3address,
+      ...dto,
     });
 
     await job.save();
