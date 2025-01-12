@@ -19,7 +19,7 @@ export class JobInput {
 
   @ApiProperty({})
   @IsString({ message: 'The delivery time must be a string' })
-  delivery_time: string;
+  duration_time: string;
 
   @ApiProperty({})
   @IsString({ message: 'The main category must be a string' })
@@ -33,9 +33,9 @@ export class JobInput {
   @ApiProperty({})
   @IsArray()
   @IsOptional()
-  requirementSkills?: string[];
+  requirement: string[];
 
   @ApiProperty({})
   @IsNumber()
-  gig_amount: number;
+  gig_budget: number;
 }

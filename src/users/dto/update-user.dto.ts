@@ -1,9 +1,6 @@
-// import { PartialType } from '@nestjs/swagger';
-
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { Social } from '../entities/user.entity';
-import { Role } from '../enum';
 
 export class UpdateUserDto {
   @ApiProperty({})
@@ -17,11 +14,6 @@ export class UpdateUserDto {
   @ApiProperty({})
   @IsString({ message: 'The userName must be a string' })
   userName: string;
-
-  @ApiProperty({})
-  @IsEnum(Role)
-  @IsString({ message: 'The role must be a string' })
-  role: Role;
 
   @ApiProperty({})
   @IsString({ message: 'The description must be a string' })

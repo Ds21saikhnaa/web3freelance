@@ -1,5 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { User } from 'src/users/entities/user.entity';
+import mongoose from 'mongoose';
 import { JobStatus } from '../enum';
+
+@Schema({ timestamps: true })
+export class Bid {
+  @Prop({ type: 'ObjectId', ref: 'User', required: true })
+  user: User | mongoose.Types.ObjectId;
+
+  @Prop()
+  amount: number;
+
+  @Prop({ type: Boolean, default: false })
+  isSelected: boolean;
+}
 
 @Schema({ timestamps: true })
 export class Job {
@@ -10,7 +24,7 @@ export class Job {
   description: string;
 
   @Prop({ type: String })
-  delivery_time: string;
+  duration_time: string;
 
   @Prop({ type: String, enum: JobStatus, default: JobStatus.Open })
   status: JobStatus;
@@ -22,13 +36,16 @@ export class Job {
   categories: string[];
 
   @Prop({ type: [String] })
-  requirementSkills: string[];
+  requirement: string[];
 
-  @Prop({ type: String })
-  client: string;
+  @Prop({ type: 'ObjectId', ref: 'User', required: true })
+  client: User | mongoose.Types.ObjectId;
 
   @Prop({ type: Number })
-  gig_amount: number;
+  gig_budget: number;
+
+  @Prop([Bid])
+  bids: Bid[];
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

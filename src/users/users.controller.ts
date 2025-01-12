@@ -3,7 +3,6 @@ import {
   Get,
   Body,
   Patch,
-  Param,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -27,19 +26,15 @@ export class UsersController {
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   me(@Request() req: any) {
-    const { web3address } = req.user;
-    return this.usersService.me(web3address);
+    const { sub } = req.user;
+    return this.usersService.me(sub);
   }
 
   @ApiBearerAuth()
-  @Patch(':id')
+  @Patch('')
   @UseGuards(AuthGuard('jwt'))
-  update(
-    @Request() req: any,
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    const { web3address } = req.user;
-    return this.usersService.update(web3address, updateUserDto);
+  update(@Request() req: any, @Body() updateUserDto: UpdateUserDto) {
+    const { sub } = req.user;
+    return this.usersService.update(sub, updateUserDto);
   }
 }

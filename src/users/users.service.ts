@@ -23,27 +23,28 @@ export class UsersService {
     return users;
   }
 
-  async me(address: string) {
-    const user = await this.userModel.findOne({ web3address: address });
+  async me(sub: string) {
+    const user = await this.userModel.findOne({ _id: sub });
     if (!user) {
       throw new NotFoundException(`User not found`);
     }
     return user;
   }
 
-  async findOne(address: string) {
+  async findOne(sub: string) {
+    const user = await this.userModel.findOne({ _id: sub });
+    return user;
+  }
+
+  async findOneWeb3(address: string) {
     const user = await this.userModel.findOne({ web3address: address });
     return user;
   }
 
-  async update(address: string, updateUserDto: UpdateUserDto) {
-    const user = await this.me(address);
+  async update(sub: string, updateUserDto: UpdateUserDto) {
+    const user = await this.me(sub);
     Object.assign(user, updateUserDto);
     await user.save();
     return user;
-  }
-
-  remove(id: string) {
-    return `This action removes a #${id} user`;
   }
 }

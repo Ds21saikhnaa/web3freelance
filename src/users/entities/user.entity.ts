@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Role } from '../enum';
 
 @Schema({ timestamps: false, _id: false })
 export class Social {
@@ -21,12 +20,6 @@ export class User {
     required: true,
   })
   web3address: string;
-
-  @Prop({ type: Boolean, default: false })
-  isVerify: string;
-
-  @Prop({ enum: Role, type: String })
-  role: Role;
 
   @Prop({ type: String })
   firstName: string;
