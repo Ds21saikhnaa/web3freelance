@@ -14,7 +14,12 @@ export class Social {
 export class User {
   _id: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({
+    type: String,
+    unique: true,
+    index: true,
+    required: true,
+  })
   web3address: string;
 
   @Prop({ type: Boolean, default: false })

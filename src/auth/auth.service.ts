@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginInput } from 'src/users/dto/create-user.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { isAddress } from 'ethers';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,10 @@ export class AuthService {
 
   async login(loginDto: LoginInput) {
     const { web3address } = loginDto;
+    const validAddress = isAddress(web3address);
+    if (!validAddress) {
+      throw new BadRequestException('This address is not a web3 address.');
+    }
     const existUser = await this.userService.findOne(web3address);
     let user: User | null;
     if (existUser) {
