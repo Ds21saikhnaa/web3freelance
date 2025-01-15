@@ -33,6 +33,16 @@ export class User {
   @Prop({ type: String })
   description: string;
 
+  @Prop({ type: String })
+  bio: string;
+
+  @Prop({
+    type: String,
+    default:
+      'https://placehold.co/150X150/EEE/31343C?font=playfair-display&text=ape',
+  })
+  profile: string;
+
   @Prop({ type: [String], default: [] })
   job_roles: string[];
 
@@ -42,8 +52,14 @@ export class User {
   @Prop({ type: [String], default: [] })
   nfts: string[];
 
+  @Prop({ type: [String], default: [] })
+  badges: string[];
+
   @Prop({ type: [Social], default: [] })
   contacts: Social[];
+
+  @Prop({ type: Number, default: 0 })
+  reward: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

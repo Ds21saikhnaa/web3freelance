@@ -29,4 +29,12 @@ export class JobsController {
   getTasks(@Query() query: Record<string, any>) {
     return this.jobsService.getJobs(query);
   }
+
+  @ApiBearerAuth()
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  getMeTasks(@Request() req: any, @Query() query: Record<string, any>) {
+    const { sub } = req.user;
+    return this.jobsService.getMeJobs(sub, query);
+  }
 }

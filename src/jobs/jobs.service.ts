@@ -85,4 +85,38 @@ export class JobsService {
 
     return { jobs, totalPage: totalPages };
   }
+
+  async getMeJobs(userId: string, query: Record<string, any>) {
+    const { sort = '-createdAt', page = 1, limit = 10 } = query;
+    // Remove unwanted keys from the query
+    const filteredQuery = Object.fromEntries(
+      Object.entries(query).filter(
+        ([key]) => !['select', 'sort', 'page', 'limit'].includes(key),
+      ),
+    );
+
+    // Build search options
+    const options: Record<string, any> = {
+      client: userId,
+      ...filteredQuery,
+    };
+
+    // Add search filters if provided
+    const skip = (page - 1) * limit;
+
+    const totalJobs = await this.jobModel.countDocuments(options);
+    const totalPages = Math.ceil(totalJobs / limit);
+
+    const jobs = await this.jobModel
+      .find(
+        options,
+        'name description gig_budget bids duration_time requirement',
+      )
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    return { jobs, totalPage: totalPages };
+  }
 }

@@ -11,6 +11,12 @@ export class Bid {
   @Prop()
   amount: number;
 
+  @Prop({ type: String })
+  duration_time: string;
+
+  @Prop({ type: String })
+  description: string;
+
   @Prop({ type: Boolean, default: false })
   isSelected: boolean;
 }

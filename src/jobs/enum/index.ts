@@ -5,3 +5,9 @@ export enum JobStatus {
   Cancelled = 'Cancelled',
   Paid = 'Paid',
 }
+
+export enum WorkStatus {
+  Doing = 'Doing',
+  Completed = 'Completed',
+  Cancelled = 'Cancelled',
+}
