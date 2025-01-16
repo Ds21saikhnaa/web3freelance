@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   Request,
@@ -9,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
-import { JobInput } from './dto/create-job.dto';
+import { CreateBidDto, JobInput } from './dto/create-job.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Job')
@@ -30,11 +31,28 @@ export class JobsController {
     return this.jobsService.getJobs(query);
   }
 
+  @Get(':id')
+  getTask(@Param('id') id: string) {
+    return this.jobsService.getJob(id);
+  }
+
   @ApiBearerAuth()
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   getMeTasks(@Request() req: any, @Query() query: Record<string, any>) {
     const { sub } = req.user;
     return this.jobsService.getMeJobs(sub, query);
+  }
+
+  @ApiBearerAuth()
+  @Post(':id/bid')
+  @UseGuards(AuthGuard('jwt'))
+  createBid(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: CreateBidDto,
+  ) {
+    const { sub } = req.user;
+    return this.jobsService.addBid(id, sub, dto);
   }
 }

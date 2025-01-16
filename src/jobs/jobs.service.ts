@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { JobInput } from './dto/create-job.dto';
+import { CreateBidDto, JobInput } from './dto/create-job.dto';
 import { Job } from './entities/jobs.entity';
 
 @Injectable()
@@ -118,5 +122,49 @@ export class JobsService {
       .exec();
 
     return { jobs, totalPage: totalPages };
+  }
+
+  async getJob(id: string) {
+    const job = await this.jobModel
+      .findById(id)
+      .populate('client', '-reward -job_roles -skills')
+      .populate({
+        path: 'bids.user', // Path to populate
+        select: '-reward -job_roles -skills',
+      })
+      .exec();
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    return job;
+  }
+
+  async addBid(jobId: string, userId: string, createBidDto: CreateBidDto) {
+    const job = await this.jobModel.findById(jobId).exec();
+
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${jobId} not found`);
+    }
+
+    if (job.client.toString() === userId) {
+      throw new BadRequestException(`This is your job`);
+    }
+
+    const existingBidIndex = job.bids.findIndex(
+      (bid) => bid.user.toString() === userId,
+    );
+
+    if (existingBidIndex !== 1) {
+      throw new BadRequestException(`You already have a bid`);
+    }
+
+    job.bids.push({
+      user: userId as any,
+      ...createBidDto,
+      isSelected: false,
+    });
+
+    return await job.save();
   }
 }

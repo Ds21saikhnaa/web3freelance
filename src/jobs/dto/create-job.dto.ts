@@ -39,3 +39,20 @@ export class JobInput {
   @IsNumber()
   gig_budget: number;
 }
+
+export class CreateBidDto {
+  @ApiProperty({})
+  @IsNumber()
+  @IsNotEmpty()
+  amount: number;
+
+  @ApiProperty({})
+  @IsString()
+  @IsOptional()
+  duration_time: string;
+
+  @ApiProperty({})
+  @IsString()
+  @IsOptional()
+  description: string;
+}

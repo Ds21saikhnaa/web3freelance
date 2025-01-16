@@ -27,7 +27,9 @@ export class SkillInput {
 }
 
 export class LoginInput {
-  @ApiProperty({})
+  @ApiProperty({
+    default: '0x4d224452801ACEd8B2F0aebE155379bb5D594381',
+  })
   @IsNotEmpty({ message: 'The web3address is required' })
   @IsString({ message: 'The web3address must be a string' })
   web3address: string;

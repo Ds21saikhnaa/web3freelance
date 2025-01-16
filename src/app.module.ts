@@ -7,6 +7,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AcceptOfferModule } from './accept-offer/accept-offer.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AcceptOfferModule } from './accept-offer/accept-offer.module';
     UsersModule,
     AuthModule,
     AcceptOfferModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
