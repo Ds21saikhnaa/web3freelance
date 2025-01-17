@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 import { JobsModule } from './jobs/jobs.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { AcceptOfferModule } from './accept-offer/accept-offer.module';
+// import { AcceptOfferModule } from './accept-offer/accept-offer.module';
 import { CategoryModule } from './category/category.module';
 
 @Module({
@@ -18,7 +18,7 @@ import { CategoryModule } from './category/category.module';
     JobsModule,
     UsersModule,
     AuthModule,
-    AcceptOfferModule,
+    // AcceptOfferModule,
     CategoryModule,
   ],
   controllers: [AppController],

@@ -36,6 +36,11 @@ export class JobsController {
     return this.jobsService.getJob(id);
   }
 
+  @Get('bid/:id')
+  getBid(@Param('id') id: string) {
+    return this.jobsService.getBid(id);
+  }
+
   @ApiBearerAuth()
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
@@ -54,5 +59,17 @@ export class JobsController {
   ) {
     const { sub } = req.user;
     return this.jobsService.addBid(id, sub, dto);
+  }
+
+  @ApiBearerAuth()
+  @Post(':id/accept-bid/:bidId')
+  @UseGuards(AuthGuard('jwt'))
+  acceptBid(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Param('bidId') bidId: string,
+  ) {
+    const { sub } = req.user;
+    return this.jobsService.acceptBid(id, sub, bidId);
   }
 }

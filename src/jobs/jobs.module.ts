@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { JobsController } from './jobs.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Job, JobSchema } from './entities/jobs.entity';
+import { Bid, BidSchema, Job, JobSchema } from './entities/jobs.entity';
 
 @Module({
   imports: [
@@ -11,6 +11,13 @@ import { Job, JobSchema } from './entities/jobs.entity';
         name: Job.name,
         useFactory: () => {
           const schema = JobSchema;
+          return schema;
+        },
+      },
+      {
+        name: Bid.name,
+        useFactory: () => {
+          const schema = BidSchema;
           return schema;
         },
       },

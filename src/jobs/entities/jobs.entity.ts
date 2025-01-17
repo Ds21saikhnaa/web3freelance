@@ -8,6 +8,9 @@ export class Bid {
   @Prop({ type: 'ObjectId', ref: 'User', required: true })
   user: User | mongoose.Types.ObjectId;
 
+  @Prop({ type: 'ObjectId', ref: 'Job', required: true })
+  job: Job | mongoose.Types.ObjectId;
+
   @Prop()
   amount: number;
 
@@ -50,8 +53,9 @@ export class Job {
   @Prop({ type: Number })
   gig_budget: number;
 
-  @Prop([Bid])
-  bids: Bid[];
+  @Prop({ type: ['ObjectId'], ref: 'Bid', default: [] })
+  bids: Bid[] | mongoose.Types.ObjectId[];
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);
+export const BidSchema = SchemaFactory.createForClass(Bid);
