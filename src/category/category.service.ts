@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class CategoryService {
@@ -18,8 +19,13 @@ export class CategoryService {
   }
 
   // Retrieve all categories
-  async findAll() {
-    return this.categoryModel.find().exec();
+  async findAll(query: QueryDto) {
+    const { parent } = query;
+    const options: Record<string, any> = { parent: parent };
+    if (parent === 'all') {
+      delete options.parent;
+    }
+    return await this.categoryModel.find(options).exec();
   }
 
   // Retrieve a single category by ID

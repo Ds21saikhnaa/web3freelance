@@ -4,6 +4,15 @@ import { Job } from '../../jobs/entities/jobs.entity';
 import { User } from '../../users/entities/user.entity';
 import { JobStatus, WorkStatus } from '../../jobs/enum';
 
+@Schema({ timestamps: false, _id: false })
+export class JobReview {
+  @Prop({ type: Number, default: 0 })
+  rating: number;
+
+  @Prop({ type: String })
+  comment: string;
+}
+
 @Schema({ timestamps: true })
 export class AcceptOffer {
   @Prop({ type: 'ObjectId', ref: 'Job', required: true })
@@ -17,6 +26,12 @@ export class AcceptOffer {
 
   @Prop({ type: String, enum: WorkStatus, default: WorkStatus.Doing })
   workStatus: JobStatus;
+
+  @Prop({ type: Number, required: true })
+  offerAmount: number;
+
+  @Prop({ type: JobReview })
+  review: JobReview;
 }
 
 export const AcceptOfferSchema = SchemaFactory.createForClass(AcceptOffer);

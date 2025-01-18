@@ -12,6 +12,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
 import { CreateBidDto, JobInput } from './dto/create-job.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { QueryDto } from './dto/query.dto';
+import { PaginationDto } from '../utils';
 
 @ApiTags('Job')
 @Controller('job')
@@ -27,7 +29,7 @@ export class JobsController {
   }
 
   @Get('')
-  getTasks(@Query() query: Record<string, any>) {
+  getTasks(@Query() query: QueryDto) {
     return this.jobsService.getJobs(query);
   }
 
@@ -44,7 +46,7 @@ export class JobsController {
   @ApiBearerAuth()
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
-  getMeTasks(@Request() req: any, @Query() query: Record<string, any>) {
+  getMeTasks(@Request() req: any, @Query() query: PaginationDto) {
     const { sub } = req.user;
     return this.jobsService.getMeJobs(sub, query);
   }

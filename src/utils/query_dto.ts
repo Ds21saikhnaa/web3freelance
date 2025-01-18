@@ -14,4 +14,7 @@ export class PaginationDto {
     maximum: 30,
   })
   limit: number;
+
+  @ApiPropertyOptional({ type: String, default: '-createdAt' })
+  sort: string;
 }

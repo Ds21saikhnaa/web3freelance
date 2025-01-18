@@ -21,17 +21,8 @@ export class User {
   })
   web3address: string;
 
-  @Prop({ type: String })
-  firstName: string;
-
-  @Prop({ type: String })
-  lastName: string;
-
   @Prop({ type: String, lowercase: true })
   userName: string;
-
-  @Prop({ type: String })
-  description: string;
 
   @Prop({ type: String })
   bio: string;
@@ -60,6 +51,15 @@ export class User {
 
   @Prop({ type: Number, default: 0 })
   reward: number;
+
+  @Prop({ type: Number, default: 0 })
+  reviewCount: number;
+
+  @Prop({ type: Number, default: 0 })
+  rating: number;
+
+  @Prop({ type: Number, default: 0 })
+  budget: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

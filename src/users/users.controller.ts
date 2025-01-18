@@ -5,12 +5,15 @@ import {
   Patch,
   UseGuards,
   Request,
+  Query,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { QueryDto } from './dto/query.dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -18,8 +21,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: QueryDto) {
+    return this.usersService.findAll(query);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
   }
 
   @ApiBearerAuth()

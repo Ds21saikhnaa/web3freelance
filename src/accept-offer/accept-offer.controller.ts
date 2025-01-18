@@ -1,45 +1,30 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
+  Controller,
   Param,
-  Delete,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { AcceptOfferService } from './accept-offer.service';
-import { CreateAcceptOfferDto } from './dto/create-accept-offer.dto';
-import { UpdateAcceptOfferDto } from './dto/update-accept-offer.dto';
+import { ReviewDto } from './dto/create-accept-offer.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller('accept-offer')
+@ApiTags('Offer')
+@Controller('offer')
 export class AcceptOfferController {
   constructor(private readonly acceptOfferService: AcceptOfferService) {}
 
-  @Post()
-  create(@Body() createAcceptOfferDto: CreateAcceptOfferDto) {
-    return this.acceptOfferService.create(createAcceptOfferDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.acceptOfferService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.acceptOfferService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
+  @ApiBearerAuth()
+  @Post('review/:id')
+  @UseGuards(AuthGuard('jwt'))
+  addReview(
+    @Request() req: any,
     @Param('id') id: string,
-    @Body() updateAcceptOfferDto: UpdateAcceptOfferDto,
+    @Body() dto: ReviewDto,
   ) {
-    return this.acceptOfferService.update(+id, updateAcceptOfferDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.acceptOfferService.remove(+id);
+    const { sub } = req.user;
+    return this.acceptOfferService.addReview(sub, id, dto);
   }
 }

@@ -8,6 +8,10 @@ import { Model } from 'mongoose';
 import { CreateBidDto, JobInput } from './dto/create-job.dto';
 import { Bid, Job } from './entities/jobs.entity';
 import { JobStatus } from './enum';
+import { AcceptOfferService } from '../accept-offer/accept-offer.service';
+import { CreateAcceptOfferDto } from '../accept-offer/dto/create-accept-offer.dto';
+import { QueryDto } from './dto/query.dto';
+import { PaginationDto } from '../utils';
 
 @Injectable()
 export class JobsService {
@@ -16,6 +20,7 @@ export class JobsService {
     private jobModel: Model<Job>,
     @InjectModel(Bid.name)
     private bidModel: Model<Bid>,
+    private readonly offerService: AcceptOfferService,
   ) {}
 
   async createJob(sub: string, dto: JobInput) {
@@ -28,7 +33,7 @@ export class JobsService {
     return job;
   }
 
-  async getJobs(query: Record<string, any>) {
+  async getJobs(query: QueryDto) {
     const {
       sort = '-createdAt',
       page = 1,
@@ -93,7 +98,7 @@ export class JobsService {
     return { jobs, totalPage: totalPages };
   }
 
-  async getMeJobs(userId: string, query: Record<string, any>) {
+  async getMeJobs(userId: string, query: PaginationDto) {
     const { sort = '-createdAt', page = 1, limit = 10 } = query;
     // Remove unwanted keys from the query
     const filteredQuery = Object.fromEntries(
@@ -218,6 +223,13 @@ export class JobsService {
       await bid.save({ session });
       job.status = JobStatus.Paid;
       await job.save({ session });
+      const offer = {
+        job: jobId,
+        freelancer: bid.user,
+        offerAmount: bid.amount,
+      } as CreateAcceptOfferDto;
+
+      await this.offerService.create(offer, session);
       await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
