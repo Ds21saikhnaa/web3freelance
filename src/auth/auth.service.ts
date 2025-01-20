@@ -60,6 +60,7 @@ export class AuthService {
     await user.save();
     const accessToken = await this.generateJwtToken(user);
     return {
+      web3Address,
       access_token: accessToken,
     };
   }
