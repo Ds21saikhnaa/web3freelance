@@ -34,3 +34,16 @@ export class LoginInput {
   @IsString({ message: 'The web3address must be a string' })
   web3address: string;
 }
+
+export class SignatureInput {
+  @ApiProperty({
+    default: '0x4d224452801ACEd8B2F0aebE155379bb5D594381',
+  })
+  @IsNotEmpty({ message: 'The web3address is required' })
+  @IsString({ message: 'The web3address must be a string' })
+  web3address: string;
+
+  @ApiProperty({})
+  @IsString({ message: 'The signature must be a string' })
+  signature: string;
+}

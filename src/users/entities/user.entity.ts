@@ -60,6 +60,9 @@ export class User {
 
   @Prop({ type: Number, default: 0 })
   budget: number;
+
+  @Prop({ type: String, default: null })
+  nonce: string | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
