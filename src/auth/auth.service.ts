@@ -42,8 +42,8 @@ export class AuthService {
     return { nonce };
   }
 
-  async verifySignature(web3Address: string, signature: string) {
-    const user = await this.userService.findOneWeb3(web3Address);
+  async verifySignature(web3address: string, signature: string) {
+    const user = await this.userService.findOneWeb3(web3address);
     if (!user || !user.nonce) {
       throw new ForbiddenException('User or nonce not found');
     }
@@ -52,7 +52,7 @@ export class AuthService {
 
     const recoveredAddress = ethers.verifyMessage(nonce, signature);
 
-    if (recoveredAddress.toLowerCase() !== web3Address.toLowerCase()) {
+    if (recoveredAddress.toLowerCase() !== web3address.toLowerCase()) {
       throw new ForbiddenException('Invalid signature');
     }
 
@@ -60,7 +60,7 @@ export class AuthService {
     await user.save();
     const accessToken = await this.generateJwtToken(user);
     return {
-      web3Address,
+      web3address,
       access_token: accessToken,
     };
   }
