@@ -1,14 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema({ timestamps: false, _id: false })
-export class Social {
-  @Prop({ type: String })
-  platform: string;
-
-  @Prop({ type: String })
-  link: string;
-}
-
 @Schema({ timestamps: true })
 export class User {
   _id: string;
@@ -26,6 +17,12 @@ export class User {
 
   @Prop({ type: String })
   bio: string;
+
+  @Prop({ type: String })
+  twitter: string;
+
+  @Prop({ type: String })
+  email: string;
 
   @Prop({
     type: String,
@@ -45,9 +42,6 @@ export class User {
 
   @Prop({ type: [String], default: [] })
   badges: string[];
-
-  @Prop({ type: [Social], default: [] })
-  contacts: Social[];
 
   @Prop({ type: Number, default: 0 })
   reward: number;

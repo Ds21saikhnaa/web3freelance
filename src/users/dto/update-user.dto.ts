@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
-import { Social } from '../entities/user.entity';
 
 export class UpdateUserDto {
   @ApiProperty({})
@@ -21,6 +20,11 @@ export class UpdateUserDto {
   @ApiProperty({ type: [String] })
   skills: string[];
 
-  @ApiProperty({ type: [Social] })
-  contacts?: Social[] | null;
+  @ApiProperty({})
+  @IsString({ message: 'The bio must be a string' })
+  twitter: string;
+
+  @ApiProperty({})
+  @IsString({ message: 'The bio must be a string' })
+  email: string;
 }
