@@ -20,11 +20,15 @@ export class CategoryService {
 
   // Retrieve all categories
   async findAll(query: QueryDto) {
-    const { parent } = query;
+    const { parent, name } = query;
     const options: Record<string, any> = { parent: parent };
     if (parent === 'all') {
       delete options.parent;
     }
+    if (name) {
+      options.name = new RegExp(name, 'i');
+    }
+
     return await this.categoryModel.find(options).exec();
   }
 

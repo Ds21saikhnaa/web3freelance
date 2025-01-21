@@ -55,6 +55,9 @@ export class Job {
 
   @Prop({ type: ['ObjectId'], ref: 'Bid', default: [] })
   bids: Bid[] | mongoose.Types.ObjectId[];
+
+  @Prop({ type: Number })
+  bid_day: number;
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

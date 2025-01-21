@@ -1,5 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
+@Schema({ timestamps: false, _id: false })
+export class Budget {
+  @Prop({ type: Number })
+  amount: number;
+  @Prop({ type: String })
+  day: string;
+  @Prop({ type: String })
+  description: string;
+}
+
 @Schema({ timestamps: true })
 export class User {
   _id: string;
@@ -52,8 +62,8 @@ export class User {
   @Prop({ type: Number, default: 0 })
   rating: number;
 
-  @Prop({ type: Number, default: 0 })
-  budget: number;
+  @Prop({ type: Budget, default: null })
+  budget: Budget;
 
   @Prop({ type: String, default: null })
   nonce: string | null;

@@ -44,7 +44,7 @@ export class JobsController {
   }
 
   @ApiBearerAuth()
-  @Get('me')
+  @Get('all/me')
   @UseGuards(AuthGuard('jwt'))
   getMeTasks(@Request() req: any, @Query() query: PaginationDto) {
     const { sub } = req.user;

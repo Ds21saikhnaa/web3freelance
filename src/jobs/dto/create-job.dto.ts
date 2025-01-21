@@ -38,6 +38,10 @@ export class JobInput {
   @ApiProperty({})
   @IsNumber()
   gig_budget: number;
+
+  @ApiProperty({})
+  @IsNumber()
+  bid_day: number;
 }
 
 export class CreateBidDto {
