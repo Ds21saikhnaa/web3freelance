@@ -64,10 +64,16 @@ export class UsersService {
     }
 
     if (minBudget !== undefined || maxBudget !== undefined) {
-      options.gig_budget = {};
-      if (minBudget !== undefined) options.budget.$gte = Number(minBudget);
-      if (maxBudget !== undefined) options.budget.$lte = Number(maxBudget);
+      options['budget.amount'] = {};
+
+      if (minBudget !== undefined)
+        options['budget.amount'].$gte = Number(minBudget);
+
+      if (maxBudget !== undefined)
+        options['budget.amount'].$lte = Number(maxBudget);
     }
+
+    console.log(options);
     const skip = (page - 1) * limit;
 
     const totalUsers = await this.userModel.countDocuments(options);

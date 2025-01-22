@@ -47,8 +47,18 @@ export class JobsController {
   @Get('all/me')
   @UseGuards(AuthGuard('jwt'))
   getMeTasks(@Request() req: any, @Query() query: PaginationDto) {
+    console.log('job');
     const { sub } = req.user;
     return this.jobsService.getMeJobs(sub, query);
+  }
+
+  @ApiBearerAuth()
+  @Get('bids/me')
+  @UseGuards(AuthGuard('jwt'))
+  meBids(@Request() req: any) {
+    console.log('bid');
+    const { sub } = req.user;
+    return this.jobsService.meBids(sub);
   }
 
   @ApiBearerAuth()

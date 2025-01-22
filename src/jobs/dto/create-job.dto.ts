@@ -41,7 +41,7 @@ export class JobInput {
 
   @ApiProperty({})
   @IsNumber()
-  bid_day: number;
+  bid_week: number;
 }
 
 export class CreateBidDto {

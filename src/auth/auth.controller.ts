@@ -7,10 +7,10 @@ import { AuthService } from './auth.service';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  // @Post('login')
-  // login(@Body() loginDto: LoginInput) {
-  //   return this.authService.login(loginDto);
-  // }
+  @Post('login')
+  login(@Body() loginDto: LoginInput) {
+    return this.authService.login(loginDto);
+  }
 
   @Post('getNonce')
   async getNonce(@Body() body: LoginInput) {

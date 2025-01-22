@@ -22,6 +22,9 @@ export class Bid {
 
   @Prop({ type: Boolean, default: false })
   isSelected: boolean;
+
+  @Prop({ type: Date })
+  bid_day_end: Date;
 }
 
 @Schema({ timestamps: true })
@@ -56,8 +59,8 @@ export class Job {
   @Prop({ type: ['ObjectId'], ref: 'Bid', default: [] })
   bids: Bid[] | mongoose.Types.ObjectId[];
 
-  @Prop({ type: Number })
-  bid_day: number;
+  @Prop({ type: Date })
+  bid_day_end: Date;
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

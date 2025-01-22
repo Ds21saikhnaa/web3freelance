@@ -24,8 +24,11 @@ export class JobsService {
   ) {}
 
   async createJob(sub: string, dto: JobInput) {
+    const { bid_week } = dto;
+    delete dto.bid_week;
     const job = new this.jobModel({
       client: sub,
+      bid_day_end: new Date(Date.now() + bid_week * 7 * 24 * 60 * 60 * 1000),
       ...dto,
     });
 
@@ -122,7 +125,7 @@ export class JobsService {
     const jobs = await this.jobModel
       .find(
         options,
-        'name description gig_budget bids duration_time requirement',
+        'title description gig_budget bids duration_time requirement status',
       )
       .sort(sort)
       .skip(skip)
@@ -167,6 +170,7 @@ export class JobsService {
     const newBid = new this.bidModel({
       job: jobId,
       user: userId,
+      bid_day_end: job.bid_day_end,
       ...createBidDto,
       isSelected: false,
     });
@@ -238,5 +242,26 @@ export class JobsService {
       session.endSession();
     }
     return bid;
+  }
+
+  async meBids(sub: string) {
+    const now = new Date();
+    const approvedBids = await this.bidModel.find({
+      user: sub,
+      isSelected: true,
+    });
+    const pendingBids = await this.bidModel.find({
+      user: sub,
+      bid_day_end: { $gte: now.getTime() },
+      isSelected: false,
+    });
+
+    const expiredBids = await this.bidModel.find({
+      user: sub,
+      bid_day_end: { $lte: now.getTime() },
+      isSelected: false,
+    });
+
+    return { approvedBids, pendingBids, expiredBids };
   }
 }
