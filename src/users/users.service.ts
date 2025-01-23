@@ -51,6 +51,8 @@ export class UsersService {
 
     // Build search options
     const options: Record<string, any> = {
+      userName: { $exists: true },
+      $expr: { $gt: [{ $size: '$job_roles' }, 0] },
       ...filteredQuery,
     };
 
@@ -73,7 +75,6 @@ export class UsersService {
         options['budget.amount'].$lte = Number(maxBudget);
     }
 
-    console.log(options);
     const skip = (page - 1) * limit;
 
     const totalUsers = await this.userModel.countDocuments(options);
@@ -90,7 +91,11 @@ export class UsersService {
   }
 
   async me(sub: string) {
-    const user = await this.userModel.findById(sub);
+    const user = await this.userModel
+      .findById(sub)
+      .populate('saved_jobs')
+      .exec();
+
     if (!user) {
       throw new NotFoundException(`User not found`);
     }

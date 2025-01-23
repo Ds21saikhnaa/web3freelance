@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Post,
   Request,
@@ -26,5 +27,21 @@ export class AcceptOfferController {
   ) {
     const { sub } = req.user;
     return this.acceptOfferService.addReview(sub, id, dto);
+  }
+
+  @ApiBearerAuth()
+  @Get('reportMe')
+  @UseGuards(AuthGuard('jwt'))
+  reportMe(@Request() req: any) {
+    const { sub } = req.user;
+    return this.acceptOfferService.reportMe(sub);
+  }
+
+  @ApiBearerAuth()
+  @Get('reviewMe')
+  @UseGuards(AuthGuard('jwt'))
+  reviewMe(@Request() req: any) {
+    const { sub } = req.user;
+    return this.acceptOfferService.reviewMe(sub);
   }
 }

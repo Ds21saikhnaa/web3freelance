@@ -21,11 +21,14 @@ export class AcceptOffer {
   @Prop({ type: 'ObjectId', ref: 'User', required: true })
   freelancer: User | mongoose.Types.ObjectId;
 
+  @Prop({ type: 'ObjectId', ref: 'User', required: true })
+  client: User | mongoose.Types.ObjectId;
+
   @Prop({ type: String, enum: JobStatus, default: JobStatus.Assigned })
   jobStatus: JobStatus;
 
   @Prop({ type: String, enum: WorkStatus, default: WorkStatus.Doing })
-  workStatus: JobStatus;
+  workStatus: WorkStatus;
 
   @Prop({ type: Number, required: true })
   offerAmount: number;

@@ -230,6 +230,7 @@ export class JobsService {
       const offer = {
         job: jobId,
         freelancer: bid.user,
+        client: job.client,
         offerAmount: bid.amount,
       } as CreateAcceptOfferDto;
 
@@ -246,21 +247,39 @@ export class JobsService {
 
   async meBids(sub: string) {
     const now = new Date();
-    const approvedBids = await this.bidModel.find({
-      user: sub,
-      isSelected: true,
-    });
-    const pendingBids = await this.bidModel.find({
-      user: sub,
-      bid_day_end: { $gte: now.getTime() },
-      isSelected: false,
-    });
+    const approvedBids = await this.bidModel
+      .find({
+        user: sub,
+        isSelected: true,
+      })
+      .populate({
+        path: 'job',
+        select: 'title description main_category status',
+      })
+      .exec();
+    const pendingBids = await this.bidModel
+      .find({
+        user: sub,
+        bid_day_end: { $gte: now.getTime() },
+        isSelected: false,
+      })
+      .populate({
+        path: 'job',
+        select: 'title description main_category status',
+      })
+      .exec();
 
-    const expiredBids = await this.bidModel.find({
-      user: sub,
-      bid_day_end: { $lte: now.getTime() },
-      isSelected: false,
-    });
+    const expiredBids = await this.bidModel
+      .find({
+        user: sub,
+        bid_day_end: { $lte: now.getTime() },
+        isSelected: false,
+      })
+      .populate({
+        path: 'job',
+        select: 'title description main_category status',
+      })
+      .exec();
 
     return { approvedBids, pendingBids, expiredBids };
   }

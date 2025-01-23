@@ -1,4 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Job } from '../../jobs/entities/jobs.entity';
+import mongoose from 'mongoose';
 
 @Schema({ timestamps: false, _id: false })
 export class Budget {
@@ -49,6 +51,9 @@ export class User {
 
   @Prop({ type: [String], default: [] })
   nfts: string[];
+
+  @Prop({ type: ['ObjectId'], ref: 'Job', default: [] })
+  saved_jobs: Job[] | mongoose.Types.ObjectId[];
 
   @Prop({ type: [String], default: [] })
   badges: string[];

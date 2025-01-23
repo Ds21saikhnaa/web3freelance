@@ -14,6 +14,11 @@ export class CreateAcceptOfferDto {
   freelancer: string | Types.ObjectId;
 
   @ApiProperty({})
+  @IsNotEmpty({ message: 'The freelancer is required' })
+  @IsMongoId()
+  client: string | Types.ObjectId;
+
+  @ApiProperty({})
   @IsNumber()
   offerAmount: number;
 }
