@@ -7,6 +7,8 @@ import {
   Request,
   Query,
   Param,
+  Post,
+  Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 
@@ -44,5 +46,21 @@ export class UsersController {
   update(@Request() req: any, @Body() updateUserDto: UpdateUserDto) {
     const { sub } = req.user;
     return this.usersService.update(sub, updateUserDto);
+  }
+
+  @ApiBearerAuth()
+  @Post('saveJob/:jobId')
+  @UseGuards(AuthGuard('jwt'))
+  saveJob(@Request() req: any, @Param('jobId') id: string) {
+    const { sub } = req.user;
+    return this.usersService.saveJob(sub, id);
+  }
+
+  @ApiBearerAuth()
+  @Delete('removeJob/:jobId')
+  @UseGuards(AuthGuard('jwt'))
+  removeJob(@Request() req: any, @Param('jobId') id: string) {
+    const { sub } = req.user;
+    return this.usersService.removeJob(sub, id);
   }
 }

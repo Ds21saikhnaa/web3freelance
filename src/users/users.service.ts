@@ -1,11 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { AcceptOffer } from '../accept-offer/entities/accept-offer.entity';
 import { QueryDto } from './dto/query.dto';
+import { Job } from '../jobs/entities/jobs.entity';
+import { JobStatus } from '../jobs/enum';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +20,8 @@ export class UsersService {
     private userModel: Model<User>,
     @InjectModel(AcceptOffer.name)
     private offerModel: Model<AcceptOffer>,
+    @InjectModel(Job.name)
+    private jobModel: Model<Job>,
   ) {}
 
   async login(web3address: string) {
@@ -153,5 +161,42 @@ export class UsersService {
     user.rating = newRating;
     await user.save();
     return true;
+  }
+
+  async saveJob(sub: string, jobId: string) {
+    const user = await this.me(sub);
+    const job = await this.jobModel.findById(jobId);
+    if (!job) {
+      throw new NotFoundException('Job not fount');
+    }
+    if (job.client.toString() === sub) {
+      throw new BadRequestException('This job is your job');
+    }
+    if (job.status !== JobStatus.Open) {
+      throw new BadRequestException('This job not open');
+    }
+    const savedJob = await this.userModel.findOne({
+      _id: sub,
+      saved_jobs: { $in: jobId },
+    });
+    if (savedJob) {
+      throw new BadRequestException('you already saved this job');
+    }
+    user.saved_jobs.push(jobId as any);
+    await user.save();
+    return user;
+  }
+
+  async removeJob(sub: string, jobId: string) {
+    const user = await this.me(sub);
+    const updateResult = await this.userModel.updateOne(
+      { _id: sub },
+      { $pull: { saved_jobs: jobId } },
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      throw new BadRequestException('Job not found in saved jobs');
+    }
+    return !!user;
   }
 }

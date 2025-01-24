@@ -7,6 +7,7 @@ import {
   AcceptOffer,
   AcceptOfferSchema,
 } from '../accept-offer/entities/accept-offer.entity';
+import { Job, JobSchema } from '../jobs/entities/jobs.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,13 @@ import {
         name: AcceptOffer.name,
         useFactory: () => {
           const schema = AcceptOfferSchema;
+          return schema;
+        },
+      },
+      {
+        name: Job.name,
+        useFactory: () => {
+          const schema = JobSchema;
           return schema;
         },
       },
