@@ -1,43 +1,39 @@
 import {
   WebSocketGateway,
   SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  private activeUsers: Map<string, string> = new Map(); // userId -> socketId
+  @WebSocketServer() server: Server;
 
   handleConnection(client: Socket) {
-    console.log('Client connected:', client.id);
+    console.log(`Client connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log('Client disconnected:', client.id);
-    this.activeUsers.delete(client.id);
-  }
-
-  @SubscribeMessage('joinRoom')
-  joinRoom(@MessageBody() roomId: string, @ConnectedSocket() client: Socket) {
-    client.join(roomId);
-    console.log(`Client ${client.id} joined room ${roomId}`);
+    console.log(`Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('sendMessage')
-  async handleMessage(
-    @MessageBody()
-    {
-      chatId,
-      sender,
-      message,
-    }: { chatId: string; sender: string; message: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    client.to(chatId).emit('receiveMessage', { sender, message });
-    // Save message to MongoDB here
+  handleMessage(client: Socket, payload: any): void {
+    const { chatId, message, sender } = payload;
+    this.server.to(chatId).emit('receiveMessage', { chatId, message, sender });
+  }
+
+  @SubscribeMessage('joinChat')
+  handleJoinChat(client: Socket, chatId: string): void {
+    client.join(chatId);
+    console.log(`Client ${client.id} joined chat ${chatId}`);
+  }
+
+  @SubscribeMessage('leaveChat')
+  handleLeaveChat(client: Socket, chatId: string): void {
+    client.leave(chatId);
+    console.log(`Client ${client.id} left chat ${chatId}`);
   }
 }

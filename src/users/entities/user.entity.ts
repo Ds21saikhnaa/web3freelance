@@ -12,6 +12,24 @@ export class Budget {
   description: string;
 }
 
+@Schema({ timestamps: false, _id: false })
+export class NFT {
+  @Prop({ type: String })
+  tokenId: string;
+
+  @Prop({ type: String })
+  tokenType: string;
+
+  @Prop({ type: String })
+  name: string;
+
+  @Prop({ type: String })
+  description: string;
+
+  @Prop({ type: String })
+  image: string;
+}
+
 @Schema({ timestamps: true })
 export class User {
   _id: string;
@@ -49,8 +67,8 @@ export class User {
   @Prop({ type: [String], default: [] })
   skills: string[];
 
-  @Prop({ type: [String], default: [] })
-  nfts: string[];
+  @Prop({ type: [NFT], default: [] })
+  nfts: NFT[];
 
   @Prop({ type: ['ObjectId'], ref: 'Job', default: [] })
   saved_jobs: Job[] | mongoose.Types.ObjectId[];

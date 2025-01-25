@@ -8,6 +8,7 @@ import {
   Message,
   MessageSchema,
 } from './entities/chat.entity';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
@@ -29,6 +30,6 @@ import {
     ]),
   ],
   controllers: [ChatController],
-  providers: [ChatService],
+  providers: [ChatService, ChatGateway],
 })
 export class ChatModule {}

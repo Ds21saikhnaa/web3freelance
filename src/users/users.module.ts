@@ -9,9 +9,11 @@ import {
 } from '../accept-offer/entities/accept-offer.entity';
 import { Job, JobSchema } from '../jobs/entities/jobs.entity';
 import { HttpModule } from '@nestjs/axios';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     MongooseModule.forFeatureAsync([
       {
         name: User.name,

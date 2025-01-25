@@ -4,10 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateChatDto, CreateMessageDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { UpdateMessageDto } from './dto/update-chat.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Chat, Message } from './entities/chat.entity';
 import { Model } from 'mongoose';
+import { ChatGateway } from './chat.gateway';
 import { QueryDto } from './dto/query.dto';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class ChatService {
   constructor(
     @InjectModel(Chat.name) private readonly chatModel: Model<Chat>,
     @InjectModel(Message.name) private readonly messageModel: Model<Message>,
+    private readonly chatGateway: ChatGateway,
   ) {}
   async create(sub: string, createChatDto: CreateChatDto) {
     const { toUser } = createChatDto;
@@ -30,12 +32,22 @@ export class ChatService {
 
   async createMessage(sub: string, dto: CreateMessageDto) {
     const { chatId, message } = dto;
+    const chat = await this.chatModel.findOne({
+      _id: chatId,
+      participants: { $in: sub },
+    });
+
+    if (!chat) {
+      throw new BadRequestException('Something went wrong');
+    }
     const newMessage = new this.messageModel({
       sender: sub,
       chatId,
       message,
     });
     await newMessage.save();
+
+    this.chatGateway.server.to(chatId).emit('receiveMessage', newMessage);
     return newMessage;
   }
 
@@ -79,6 +91,7 @@ export class ChatService {
     const totalPages = Math.ceil(totalChats / limit);
     const messages = await this.messageModel
       .find(options)
+      .populate({ path: 'sender', select: 'web3address userName profile' })
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -86,7 +99,35 @@ export class ChatService {
     return { messages, totalPage: totalPages };
   }
 
-  update(id: string, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
+  async updateMessage(
+    id: string,
+    sub: string,
+    updateChatDto: UpdateMessageDto,
+  ) {
+    const message = await this.messageModel.findOneAndUpdate(
+      {
+        _id: id,
+        sender: sub,
+      },
+      { message: updateChatDto.message },
+      { new: true },
+    );
+    if (!message) {
+      throw new NotFoundException(`Chat not found`);
+    }
+    return message;
+  }
+
+  async deleteMessage(id: string, sub: string) {
+    const message = await this.messageModel.findOneAndDelete({
+      _id: id,
+      sender: sub,
+    });
+    if (!message) {
+      throw new NotFoundException(
+        `Message not found or you are not authorized to delete it.`,
+      );
+    }
+    return message;
   }
 }

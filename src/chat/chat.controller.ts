@@ -3,18 +3,19 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
+  Patch,
   UseGuards,
   Request,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto, CreateMessageDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { QueryDto } from './dto/query.dto';
+import { UpdateMessageDto } from './dto/update-chat.dto';
 
 @ApiTags('Chat')
 @Controller('chat')
@@ -58,8 +59,19 @@ export class ChatController {
     return this.chatService.findAllOneChat(id, sub, query);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChatDto: UpdateChatDto) {
-    return this.chatService.update(id, updateChatDto);
+  @Patch(':id/message')
+  updateMessage(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() updateChatDto: UpdateMessageDto,
+  ) {
+    const { sub } = req.user;
+    return this.chatService.updateMessage(id, sub, updateChatDto);
+  }
+
+  @Delete(':id/message')
+  deleteMessage(@Request() req: any, @Param('id') id: string) {
+    const { sub } = req.user;
+    return this.chatService.deleteMessage(id, sub);
   }
 }

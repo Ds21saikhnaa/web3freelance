@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,11 +14,14 @@ import { QueryDto } from './dto/query.dto';
 import { HttpService } from '@nestjs/axios';
 import { Job } from '../jobs/entities/jobs.entity';
 import { JobStatus } from '../jobs/enum';
-import { catchError, lastValueFrom, map } from 'rxjs';
-import { NftContractAddress } from './enum';
+import { lastValueFrom } from 'rxjs';
+import { Cron } from '@nestjs/schedule';
+import { NftContractAddress, NftContractAddressWithBadge } from './enum';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
@@ -191,31 +195,45 @@ export class UsersService {
     const user = await this.me(sub);
     const fetchedNFTs = await this.getNfts(user.web3address);
     console.log(`${sub} user's nfts: `, fetchedNFTs);
-    // nfts filter logic is here
-    const nfts = [];
-    const badges = [];
-    user.badges = badges;
-    user.nfts = nfts;
-    user.lastSynced = new Date();
-    await user.save();
+    if (fetchedNFTs?.ownedNfts?.length) {
+      const badges = fetchedNFTs.ownedNfts.map(
+        (el) => NftContractAddressWithBadge[el?.contract?.address],
+      );
+      const nfts = fetchedNFTs.ownedNfts.map((el) => ({
+        tokenId: el?.tokenId || '',
+        tokenType: el?.tokenType || '',
+        name: el?.name || '',
+        description: el?.description || '',
+        image: el?.image?.originalUrl || '',
+      }));
+      user.badges = badges;
+      user.nfts = nfts;
+      user.lastSynced = new Date();
+      await user.save();
+    }
     return user;
   }
 
   async getNfts(walletAddress: string) {
     const options = {};
-    const toWeb3 = this.httpService
-      .get(
+    const result = await lastValueFrom(
+      this.httpService.post(
         `${process.env.WEB3_URL}/nft/v3/${process.env.WEB3_API_KEY}/getNFTsForOwner?owner=${walletAddress}&contractAddresses[]=${NftContractAddress}&withMetadata=true&pageSize=100`,
         options,
-      )
-      .pipe(
-        map((response) => response.data),
-        catchError(async (error) => {
-          console.log('error: ', error.response.data);
-          return false;
-        }),
-      );
-    const result = await lastValueFrom(toWeb3);
+      ),
+    );
     return result.data;
+  }
+
+  @Cron('0 0 * * *')
+  async handleMidnightTask() {
+    this.logger.log('Running the midnight sync job');
+
+    const users = await this.userModel.find();
+    for (const user of users) {
+      await this.syncNftAndBadges(user._id);
+    }
+
+    this.logger.log('end');
   }
 }
