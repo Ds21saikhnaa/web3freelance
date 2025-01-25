@@ -8,6 +8,7 @@ import {
   AcceptOfferSchema,
 } from '../accept-offer/entities/accept-offer.entity';
 import { Job, JobSchema } from '../jobs/entities/jobs.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { Job, JobSchema } from '../jobs/entities/jobs.entity';
         },
       },
     ]),
+    HttpModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

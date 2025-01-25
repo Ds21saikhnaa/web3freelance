@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 // import { AcceptOfferModule } from './accept-offer/accept-offer.module';
 import { CategoryModule } from './category/category.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { CategoryModule } from './category/category.module';
     AuthModule,
     // AcceptOfferModule,
     CategoryModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

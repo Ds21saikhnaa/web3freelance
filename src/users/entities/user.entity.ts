@@ -72,6 +72,9 @@ export class User {
 
   @Prop({ type: String, default: null })
   nonce: string | null;
+
+  @Prop({ type: Date, default: new Date() })
+  lastSynced: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -46,27 +46,9 @@ export class JobsService {
       minBudget,
       maxBudget,
     } = query;
-    // Remove unwanted keys from the query
-    const filteredQuery = Object.fromEntries(
-      Object.entries(query).filter(
-        ([key]) =>
-          ![
-            'select',
-            'sort',
-            'page',
-            'limit',
-            'search',
-            'category',
-            'minBudget',
-            'maxBudget',
-          ].includes(key),
-      ),
-    );
 
     // Build search options
-    const options: Record<string, any> = {
-      ...filteredQuery,
-    };
+    const options: Record<string, any> = {};
 
     // Add search filters if provided
     if (search) {
@@ -103,17 +85,10 @@ export class JobsService {
 
   async getMeJobs(userId: string, query: PaginationDto) {
     const { sort = '-createdAt', page = 1, limit = 10 } = query;
-    // Remove unwanted keys from the query
-    const filteredQuery = Object.fromEntries(
-      Object.entries(query).filter(
-        ([key]) => !['select', 'sort', 'page', 'limit'].includes(key),
-      ),
-    );
 
     // Build search options
     const options: Record<string, any> = {
       client: userId,
-      ...filteredQuery,
     };
 
     // Add search filters if provided
@@ -147,8 +122,13 @@ export class JobsService {
     if (!job) {
       throw new NotFoundException('Job not found');
     }
+    const jobs = await this.jobModel
+      .find({ client: job.client }, 'title description')
+      .sort('-createdAt')
+      .limit(3)
+      .exec();
 
-    return job;
+    return { job, more: jobs };
   }
 
   async addBid(jobId: string, userId: string, createBidDto: CreateBidDto) {
@@ -166,7 +146,12 @@ export class JobsService {
 
     const bid = await this.bidModel.findOne({ user: userId, job: job._id });
     if (bid) throw new BadRequestException(`You already have a bid`);
-
+    const now = new Date();
+    if (now > job.bid_day_end) {
+      throw new BadRequestException(
+        `The bid date for this job creation has ended.`,
+      );
+    }
     const newBid = new this.bidModel({
       job: jobId,
       user: userId,

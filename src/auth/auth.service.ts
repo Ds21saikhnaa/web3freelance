@@ -22,6 +22,7 @@ export class AuthService {
       user = existUser;
     } else {
       user = await this.userService.login(web3address);
+      await this.userService.syncNftAndBadges(user._id);
     }
     const accessToken = await this.generateJwtToken(user);
     return {
@@ -33,6 +34,7 @@ export class AuthService {
     let user = await this.userService.findOneWeb3(address);
     if (!user) {
       user = await this.userService.login(address);
+      // await this.userService.syncNftAndBadges(user._id);
     }
     const nonce = `Sign this message to authenticate: ${Math.floor(
       Math.random() * 1000000,

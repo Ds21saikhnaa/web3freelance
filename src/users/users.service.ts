@@ -4,14 +4,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { AcceptOffer } from '../accept-offer/entities/accept-offer.entity';
 import { QueryDto } from './dto/query.dto';
+import { HttpService } from '@nestjs/axios';
 import { Job } from '../jobs/entities/jobs.entity';
 import { JobStatus } from '../jobs/enum';
+import { catchError, lastValueFrom, map } from 'rxjs';
+import { NftContractAddress } from './enum';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +25,7 @@ export class UsersService {
     private offerModel: Model<AcceptOffer>,
     @InjectModel(Job.name)
     private jobModel: Model<Job>,
+    private readonly httpService: HttpService,
   ) {}
 
   async login(web3address: string) {
@@ -40,28 +44,11 @@ export class UsersService {
       minBudget,
       maxBudget,
     } = query;
-    // Remove unwanted keys from the query
-    const filteredQuery = Object.fromEntries(
-      Object.entries(query).filter(
-        ([key]) =>
-          ![
-            'select',
-            'sort',
-            'page',
-            'limit',
-            'search',
-            'category',
-            'minBudget',
-            'maxBudget',
-          ].includes(key),
-      ),
-    );
 
     // Build search options
     const options: Record<string, any> = {
       userName: { $exists: true },
       $expr: { $gt: [{ $size: '$job_roles' }, 0] },
-      ...filteredQuery,
     };
 
     // Add category filter if provided
@@ -198,5 +185,37 @@ export class UsersService {
       throw new BadRequestException('Job not found in saved jobs');
     }
     return !!user;
+  }
+
+  async syncNftAndBadges(sub: string) {
+    const user = await this.me(sub);
+    const fetchedNFTs = await this.getNfts(user.web3address);
+    console.log(`${sub} user's nfts: `, fetchedNFTs);
+    // nfts filter logic is here
+    const nfts = [];
+    const badges = [];
+    user.badges = badges;
+    user.nfts = nfts;
+    user.lastSynced = new Date();
+    await user.save();
+    return user;
+  }
+
+  async getNfts(walletAddress: string) {
+    const options = {};
+    const toWeb3 = this.httpService
+      .get(
+        `${process.env.WEB3_URL}/nft/v3/${process.env.WEB3_API_KEY}/getNFTsForOwner?owner=${walletAddress}&contractAddresses[]=${NftContractAddress}&withMetadata=true&pageSize=100`,
+        options,
+      )
+      .pipe(
+        map((response) => response.data),
+        catchError(async (error) => {
+          console.log('error: ', error.response.data);
+          return false;
+        }),
+      );
+    const result = await lastValueFrom(toWeb3);
+    return result.data;
   }
 }
