@@ -29,6 +29,8 @@ export class Bid {
 
 @Schema({ timestamps: true })
 export class Job {
+  _id: string;
+
   @Prop({ type: String })
   hash: string;
 
@@ -58,6 +60,9 @@ export class Job {
 
   @Prop({ type: Number })
   gig_budget: number;
+
+  @Prop({ type: Number })
+  first_budget: number;
 
   @Prop({ type: ['ObjectId'], ref: 'Bid', default: [] })
   bids: Bid[] | mongoose.Types.ObjectId[];

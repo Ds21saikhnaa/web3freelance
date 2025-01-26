@@ -60,6 +60,13 @@ export class JobsController {
   }
 
   @ApiBearerAuth()
+  @Post('rollback/:hash')
+  @UseGuards(AuthGuard('jwt'))
+  roleBack(@Param('hash') hash: string) {
+    return this.jobsService.roleBack(hash);
+  }
+
+  @ApiBearerAuth()
   @Post(':id/bid')
   @UseGuards(AuthGuard('jwt'))
   createBid(

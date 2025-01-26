@@ -11,7 +11,7 @@ import { JobStatus } from './enum';
 // import { AcceptOfferService } from '../accept-offer/accept-offer.service';
 // import { CreateAcceptOfferDto } from '../accept-offer/dto/create-accept-offer.dto';
 import { QueryDto } from './dto/query.dto';
-import { PaginationDto } from '../utils';
+import { decrypt, encrypt, PaginationDto } from '../utils';
 
 @Injectable()
 export class JobsService {
@@ -215,16 +215,10 @@ export class JobsService {
     try {
       await bid.save({ session });
       job.status = JobStatus.Paid;
+      job.first_budget = job.gig_budget;
       job.gig_budget = bid.amount;
+      job.hash = encrypt(job);
       await job.save({ session });
-      // const offer = {
-      //   job: jobId,
-      //   freelancer: bid.user,
-      //   client: job.client,
-      //   offerAmount: bid.amount,
-      // } as CreateAcceptOfferDto;
-      //
-      // await this.offerService.create(offer, session);
       await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
@@ -232,7 +226,23 @@ export class JobsService {
     } finally {
       session.endSession();
     }
-    return bid;
+    return job;
+  }
+
+  async roleBack(hash: string) {
+    console.log(hash);
+    const job = decrypt(hash);
+    const { _id } = job;
+    const sysJob = await this.jobModel.findById(_id);
+    if (!sysJob) {
+      throw new NotFoundException(`Job not found`);
+    }
+    sysJob.status = JobStatus.Open;
+    sysJob.gig_budget = sysJob.first_budget;
+    sysJob.hash = null;
+    await sysJob.save();
+    await this.bidModel.updateMany({ job: sysJob._id }, { isSelected: false });
+    return sysJob;
   }
 
   async meBids(sub: string) {
