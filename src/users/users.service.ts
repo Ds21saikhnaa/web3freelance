@@ -192,6 +192,9 @@ export class UsersService {
   }
 
   async syncNftAndBadges(sub: string) {
+    if (sub === '6783ceb6225a5af8de0485ae') {
+      return;
+    }
     const user = await this.me(sub);
     const fetchedNFTs = await this.getNfts(user.web3address);
     console.log(`${sub} user's nfts: `, fetchedNFTs);
@@ -215,13 +218,14 @@ export class UsersService {
   }
 
   async getNfts(walletAddress: string) {
-    const options = {};
-    const result = await lastValueFrom(
-      this.httpService.post(
-        `${process.env.WEB3_URL}/nft/v3/${process.env.WEB3_API_KEY}/getNFTsForOwner?owner=${walletAddress}&contractAddresses[]=${NftContractAddress}&withMetadata=true&pageSize=100`,
-        options,
-      ),
-    );
+    const url = `${process.env.WEB3_URL}/nft/v3/${process.env.WEB3_API_KEY}/getNFTsForOwner`;
+    const params = {
+      owner: walletAddress,
+      contractAddresses: NftContractAddress,
+      withMetadata: true,
+      pageSize: 100,
+    };
+    const result = await lastValueFrom(this.httpService.get(url, { params }));
     return result.data;
   }
 
@@ -232,8 +236,14 @@ export class UsersService {
     const users = await this.userModel.find();
     for (const user of users) {
       await this.syncNftAndBadges(user._id);
+      await this.delay(5000);
+      // await this.delay(30000);
     }
 
     this.logger.log('end');
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
