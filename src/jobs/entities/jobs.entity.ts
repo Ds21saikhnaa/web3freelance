@@ -32,8 +32,8 @@ export class Job {
   @Prop({ type: String })
   title: string;
 
-  @Prop({ type: String })
-  description: string;
+  @Prop({})
+  description: any[];
 
   @Prop({ type: String })
   duration_time: string;

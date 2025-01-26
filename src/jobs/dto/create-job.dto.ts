@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  ArrayNotEmpty,
   IsArray,
   IsNotEmpty,
   IsNumber,
@@ -13,8 +14,9 @@ export class JobInput {
   @IsString({ message: 'The title must be a string' })
   title: string;
 
-  @ApiProperty({})
-  @IsString({ message: 'The description must be a string' })
+  @ApiProperty()
+  @IsArray()
+  @ArrayNotEmpty()
   description: string;
 
   @ApiProperty({})

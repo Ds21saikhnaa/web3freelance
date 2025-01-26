@@ -46,7 +46,7 @@ export class User {
   userName: string;
 
   @Prop({ type: String })
-  bio: string;
+  bio: any[];
 
   @Prop({ type: String })
   twitter: string;

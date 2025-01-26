@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, ValidateNested } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 class BudgetType {
   @ApiProperty({ description: 'The amount for the budget' })
@@ -20,8 +26,9 @@ export class UpdateUserDto {
   @IsString({ message: 'The userName must be a string' })
   userName: string;
 
-  @ApiProperty({})
-  @IsString({ message: 'The bio must be a string' })
+  @ApiProperty()
+  @IsArray()
+  @ArrayNotEmpty()
   bio: string;
 
   @ApiProperty({})
