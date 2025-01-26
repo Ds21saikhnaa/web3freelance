@@ -125,7 +125,7 @@ export class JobsService {
       throw new NotFoundException('Job not found');
     }
     const jobs = await this.jobModel
-      .find({ client: job.client }, 'title description')
+      .find({ _id: { $ne: id }, client: job.client }, 'title description')
       .sort('-createdAt')
       .limit(3)
       .exec();
