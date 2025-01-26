@@ -75,7 +75,7 @@ export class JobsService {
 
     const jobs = await this.jobModel
       .find(options)
-      .populate('bids')
+      .populate({ path: 'bids', select: 'user' })
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -241,7 +241,8 @@ export class JobsService {
       })
       .populate({
         path: 'job',
-        select: 'title description main_category status bid_day_end',
+        select: 'title description bids main_category status bid_day_end',
+        populate: { path: 'bids' },
       })
       .exec();
     const pendingBids = await this.bidModel
@@ -252,7 +253,8 @@ export class JobsService {
       })
       .populate({
         path: 'job',
-        select: 'title description main_category status bid_day_end',
+        select: 'title description bids main_category status bid_day_end',
+        populate: { path: 'bids' },
       })
       .exec();
 
@@ -264,7 +266,8 @@ export class JobsService {
       })
       .populate({
         path: 'job',
-        select: 'title description main_category status bid_day_end',
+        select: 'title description main_category bids status bid_day_end',
+        populate: { path: 'bids' },
       })
       .exec();
 
