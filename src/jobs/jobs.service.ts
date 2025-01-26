@@ -252,7 +252,7 @@ export class JobsService {
       })
       .populate({
         path: 'job',
-        select: 'title description main_category status',
+        select: 'title description main_category status bid_day_end',
       })
       .exec();
 
@@ -264,7 +264,7 @@ export class JobsService {
       })
       .populate({
         path: 'job',
-        select: 'title description main_category status',
+        select: 'title description main_category status bid_day_end',
       })
       .exec();
 
