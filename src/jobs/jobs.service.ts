@@ -75,6 +75,7 @@ export class JobsService {
 
     const jobs = await this.jobModel
       .find(options)
+      .populate('bids')
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -100,8 +101,9 @@ export class JobsService {
     const jobs = await this.jobModel
       .find(
         options,
-        'title description gig_budget bids duration_time requirement status',
+        'title description gig_budget bids duration_time bid_day_end requirement status',
       )
+      .populate('bids')
       .sort(sort)
       .skip(skip)
       .limit(limit)

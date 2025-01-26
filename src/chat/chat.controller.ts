@@ -44,7 +44,6 @@ export class ChatController {
 
   @Get(':id')
   findAllOneChat(@Request() req: any, @Param('id') id: string) {
-    console.log('ene');
     const { sub } = req.user;
     return this.chatService.findOne(id, sub);
   }
