@@ -8,8 +8,8 @@ import { Model } from 'mongoose';
 import { CreateBidDto, JobInput } from './dto/create-job.dto';
 import { Bid, Job } from './entities/jobs.entity';
 import { JobStatus } from './enum';
-import { AcceptOfferService } from '../accept-offer/accept-offer.service';
-import { CreateAcceptOfferDto } from '../accept-offer/dto/create-accept-offer.dto';
+// import { AcceptOfferService } from '../accept-offer/accept-offer.service';
+// import { CreateAcceptOfferDto } from '../accept-offer/dto/create-accept-offer.dto';
 import { QueryDto } from './dto/query.dto';
 import { PaginationDto } from '../utils';
 
@@ -20,7 +20,7 @@ export class JobsService {
     private jobModel: Model<Job>,
     @InjectModel(Bid.name)
     private bidModel: Model<Bid>,
-    private readonly offerService: AcceptOfferService,
+    // private readonly offerService: AcceptOfferService,
   ) {}
 
   async createJob(sub: string, dto: JobInput) {
@@ -48,7 +48,9 @@ export class JobsService {
     } = query;
 
     // Build search options
-    const options: Record<string, any> = {};
+    const options: Record<string, any> = {
+      status: JobStatus.Open,
+    };
 
     // Add search filters if provided
     if (search) {
@@ -213,15 +215,16 @@ export class JobsService {
     try {
       await bid.save({ session });
       job.status = JobStatus.Paid;
+      job.gig_budget = bid.amount;
       await job.save({ session });
-      const offer = {
-        job: jobId,
-        freelancer: bid.user,
-        client: job.client,
-        offerAmount: bid.amount,
-      } as CreateAcceptOfferDto;
-
-      await this.offerService.create(offer, session);
+      // const offer = {
+      //   job: jobId,
+      //   freelancer: bid.user,
+      //   client: job.client,
+      //   offerAmount: bid.amount,
+      // } as CreateAcceptOfferDto;
+      //
+      // await this.offerService.create(offer, session);
       await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();

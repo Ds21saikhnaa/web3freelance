@@ -117,7 +117,10 @@ export class UsersService {
       .populate({
         path: 'job',
         select: 'client',
-        populate: { path: 'client', select: 'badges profile userName' },
+        populate: {
+          path: 'client',
+          select: 'badges profile userName web3address',
+        },
       })
       .exec();
     return { user, reviews: jobs };

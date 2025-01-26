@@ -30,6 +30,9 @@ export class Bid {
 @Schema({ timestamps: true })
 export class Job {
   @Prop({ type: String })
+  hash: string;
+
+  @Prop({ type: String })
   title: string;
 
   @Prop({})
