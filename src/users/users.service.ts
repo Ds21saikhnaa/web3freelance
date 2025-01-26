@@ -199,18 +199,14 @@ export class UsersService {
     const fetchedNFTs = await this.getNfts(user.web3address);
     console.log(`${sub} user's nfts: `, fetchedNFTs);
     if (fetchedNFTs?.ownedNfts?.length) {
-      const badges = fetchedNFTs.ownedNfts.map(
-        (el) => NftContractAddressWithBadge[el?.contract?.address],
+      const badges: string[] = Array.from(
+        new Set(
+          fetchedNFTs.ownedNfts
+            .map((el) => NftContractAddressWithBadge[el?.contract?.address])
+            .filter((badge): badge is string => !!badge), // Filter and assert type
+        ),
       );
-      const nfts = fetchedNFTs.ownedNfts.map((el) => ({
-        tokenId: el?.tokenId || '',
-        tokenType: el?.tokenType || '',
-        name: el?.name || '',
-        description: el?.description || '',
-        image: el?.image?.originalUrl || '',
-      }));
       user.badges = badges;
-      user.nfts = nfts;
       user.lastSynced = new Date();
       await user.save();
     }

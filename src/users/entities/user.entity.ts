@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Job } from '../../jobs/entities/jobs.entity';
 import mongoose from 'mongoose';
+import { ArrayMaxSize } from 'class-validator';
 
 @Schema({ timestamps: false, _id: false })
 export class Budget {
@@ -10,24 +11,6 @@ export class Budget {
   day: string;
   @Prop({ type: String })
   description: string;
-}
-
-@Schema({ timestamps: false, _id: false })
-export class NFT {
-  @Prop({ type: String })
-  tokenId: string;
-
-  @Prop({ type: String })
-  tokenType: string;
-
-  @Prop({ type: String })
-  name: string;
-
-  @Prop({ type: String })
-  description: string;
-
-  @Prop({ type: String })
-  image: string;
 }
 
 @Schema({ timestamps: true })
@@ -67,8 +50,9 @@ export class User {
   @Prop({ type: [String], default: [] })
   skills: string[];
 
-  @Prop({ type: [NFT], default: [] })
-  nfts: NFT[];
+  @Prop({ type: [String], default: [] })
+  @ArrayMaxSize(3, { message: 'You can select a maximum of 3 badges.' })
+  selected_badges: string[];
 
   @Prop({ type: ['ObjectId'], ref: 'Job', default: [] })
   saved_jobs: Job[] | mongoose.Types.ObjectId[];

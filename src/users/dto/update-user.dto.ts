@@ -41,6 +41,9 @@ export class UpdateUserDto {
   @ApiProperty({ type: [String] })
   skills: string[];
 
+  @ApiProperty({ type: [String] })
+  selected_badges: string[];
+
   @ApiProperty({})
   @IsString({ message: 'The bio must be a string' })
   twitter: string;
