@@ -99,7 +99,7 @@ export class UsersService {
       })
       .populate({
         path: 'reviews.reviewer', // Populate the 'reviewer' field in the reviews
-        select: 'userName profile web3address', // Select specific fields from the User schema
+        select: 'userName profile web3address badges', // Select specific fields from the User schema
       })
       .exec();
 
@@ -117,30 +117,13 @@ export class UsersService {
       })
       .populate({
         path: 'reviews.reviewer', // Populate the 'reviewer' field in the reviews
-        select: 'userName profile web3address', // Select specific fields from the User schema
+        select: 'userName profile web3address badges', // Select specific fields from the User schema
       })
       .exec();
     if (!user) {
       throw new NotFoundException(`User with ID ${sub} not found`);
     }
-    const jobs = await this.offerModel
-      .find(
-        {
-          freelancer: sub,
-          'review.rating': { $gt: 0 },
-        },
-        'job freelancer offerAmount review',
-      )
-      .populate({
-        path: 'job',
-        select: 'client',
-        populate: {
-          path: 'client',
-          select: 'badges profile userName web3address',
-        },
-      })
-      .exec();
-    return { user, reviews: jobs };
+    return { user };
   }
 
   async findOneWeb3(address: string) {
