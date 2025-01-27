@@ -105,10 +105,13 @@ export class JobsService {
         options,
         'title description gig_budget bids duration_time bid_day_end requirement status',
       )
-      .populate('bids')
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .populate({
+        path: 'bids',
+        populate: { path: 'user' },
+      })
       .exec();
 
     return { jobs, totalPage: totalPages };

@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Job } from '../../jobs/entities/jobs.entity';
 import mongoose from 'mongoose';
 import { ArrayMaxSize } from 'class-validator';
+import { PricePackage } from '../enum';
 
 @Schema({ timestamps: false, _id: false })
 export class Review {
@@ -20,12 +21,14 @@ export class Review {
 
 @Schema({ timestamps: false, _id: false })
 export class Budget {
+  @Prop({ type: String, enum: PricePackage })
+  type: PricePackage;
   @Prop({ type: Number })
   amount: number;
   @Prop({ type: String })
   day: string;
-  @Prop({ type: String })
-  description: string;
+  @Prop({ type: [String] })
+  description: string[];
 }
 
 @Schema({ timestamps: true })
@@ -87,8 +90,9 @@ export class User {
   @Prop({ type: [Review], default: [] })
   reviews: Review[];
 
-  @Prop({ type: Budget, default: null })
-  budget: Budget;
+  @Prop({ type: [Budget], default: [] })
+  @ArrayMaxSize(3, { message: 'You can create a maximum of 3 budget.' })
+  budget: Budget[];
 
   @Prop({ type: String, default: null })
   nonce: string | null;
