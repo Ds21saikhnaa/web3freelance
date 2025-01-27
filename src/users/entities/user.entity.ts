@@ -43,7 +43,7 @@ export class User {
   @Prop({ type: String, lowercase: true })
   userName: string;
 
-  @Prop({ type: String })
+  @Prop({})
   bio: any[];
 
   @Prop({ type: String })
