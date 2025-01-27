@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export interface SkillType {
   name: string;
@@ -41,4 +49,21 @@ export class SignatureInput {
   @ApiProperty({})
   @IsString({ message: 'The signature must be a string' })
   signature: string;
+}
+
+export class ReviewDto {
+  @ApiProperty({ required: true })
+  @Min(0)
+  @Max(5)
+  @IsNumber()
+  rating: number;
+
+  @ApiProperty({ required: true })
+  @IsString()
+  comment: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsMongoId()
+  job: string;
 }

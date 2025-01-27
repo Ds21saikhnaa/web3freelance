@@ -16,6 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { QueryDto } from './dto/query.dto';
+import { ReviewDto } from './dto/create-user.dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -46,6 +47,18 @@ export class UsersController {
   update(@Request() req: any, @Body() updateUserDto: UpdateUserDto) {
     const { sub } = req.user;
     return this.usersService.update(sub, updateUserDto);
+  }
+
+  @ApiBearerAuth()
+  @Post('review/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  addReview(
+    @Request() req: any,
+    @Param('userId') id: string,
+    @Body() dto: ReviewDto,
+  ) {
+    const { sub } = req.user;
+    return this.usersService.addReview(id, sub, dto);
   }
 
   @ApiBearerAuth()

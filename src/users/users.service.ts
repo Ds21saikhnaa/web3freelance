@@ -17,6 +17,7 @@ import { JobStatus } from '../jobs/enum';
 import { lastValueFrom } from 'rxjs';
 import { Cron } from '@nestjs/schedule';
 import { NftContractAddress, NftContractAddressWithBadge } from './enum';
+import { ReviewDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -93,6 +94,13 @@ export class UsersService {
     const user = await this.userModel
       .findById(sub)
       .populate('saved_jobs')
+      .populate({
+        path: 'reviews.job',
+      })
+      .populate({
+        path: 'reviews.reviewer', // Populate the 'reviewer' field in the reviews
+        select: 'userName profile web3address', // Select specific fields from the User schema
+      })
       .exec();
 
     if (!user) {
@@ -102,7 +110,16 @@ export class UsersService {
   }
 
   async findOne(sub: string) {
-    const user = await this.userModel.findOne({ _id: sub });
+    const user = await this.userModel
+      .findOne({ _id: sub })
+      .populate({
+        path: 'reviews.job',
+      })
+      .populate({
+        path: 'reviews.reviewer', // Populate the 'reviewer' field in the reviews
+        select: 'userName profile web3address', // Select specific fields from the User schema
+      })
+      .exec();
     if (!user) {
       throw new NotFoundException(`User with ID ${sub} not found`);
     }
@@ -214,6 +231,26 @@ export class UsersService {
       await user.save();
     }
     return user;
+  }
+
+  async addReview(id: string, sub: string, dto: ReviewDto) {
+    try {
+      const user = await this.me(id);
+      const review = { reviewer: sub, ...dto } as any;
+      user.reviews.push(review);
+      const totalReviews = user.reviews.length;
+      const totalRating = user.reviews.reduce(
+        (sum, rev) => sum + rev.rating,
+        0,
+      );
+      const newRating = totalReviews > 0 ? totalRating / totalReviews : 0;
+      user.reviewCount = totalReviews;
+      user.rating = Number(newRating.toFixed(2));
+      await user.save();
+      return user;
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
   async getNfts(walletAddress: string) {

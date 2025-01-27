@@ -4,6 +4,21 @@ import mongoose from 'mongoose';
 import { ArrayMaxSize } from 'class-validator';
 
 @Schema({ timestamps: false, _id: false })
+export class Review {
+  @Prop({ type: Number, default: 0, max: 5, min: 0 })
+  rating: number;
+
+  @Prop({ type: String })
+  comment: string;
+
+  @Prop({ type: 'ObjectId', ref: 'Job', required: false })
+  job: Job | mongoose.Types.ObjectId;
+
+  @Prop({ type: 'ObjectId', ref: 'User', required: true })
+  reviewer: User | mongoose.Types.ObjectId;
+}
+
+@Schema({ timestamps: false, _id: false })
 export class Budget {
   @Prop({ type: Number })
   amount: number;
@@ -68,6 +83,9 @@ export class User {
 
   @Prop({ type: Number, default: 0 })
   rating: number;
+
+  @Prop({ type: [Review], default: [] })
+  reviews: Review[];
 
   @Prop({ type: Budget, default: null })
   budget: Budget;
