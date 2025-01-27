@@ -37,7 +37,7 @@ export class Job {
   @Prop({ type: String })
   title: string;
 
-  @Prop({})
+  @Prop()
   description: any[];
 
   @Prop({ type: String })
