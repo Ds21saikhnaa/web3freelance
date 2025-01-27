@@ -190,7 +190,10 @@ export class JobsService {
   }
 
   async acceptBid(jobId: string, userId: string, bidId: string) {
-    const job = await this.jobModel.findById(jobId).exec();
+    const job = await this.jobModel
+      .findById(jobId)
+      .populate({ path: 'client', select: 'web3address' })
+      .exec();
 
     if (!job) {
       throw new NotFoundException(`Job with ID ${jobId} not found`);
@@ -199,7 +202,7 @@ export class JobsService {
       throw new BadRequestException(`Job is not open`);
     }
 
-    if (job.client.toString() !== userId) {
+    if (job.client._id.toString() !== userId) {
       throw new BadRequestException(`This is not your job`);
     }
 
