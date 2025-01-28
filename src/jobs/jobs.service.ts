@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -13,9 +14,19 @@ import { JobStatus } from './enum';
 import { QueryDto } from './dto/query.dto';
 import { decrypt, encrypt, PaginationDto } from '../utils';
 import { UsersService } from '../users/users.service';
+import {
+  BigNumberish,
+  ethers,
+  formatEther,
+  formatUnits,
+  getBigInt,
+} from 'ethers';
+import { ABI } from './dto/abi';
 
 @Injectable()
-export class JobsService {
+export class JobsService implements OnModuleInit {
+  private provider: ethers.Provider;
+  private contract: ethers.Contract;
   constructor(
     @InjectModel(Job.name)
     private jobModel: Model<Job>,
@@ -23,7 +34,55 @@ export class JobsService {
     private bidModel: Model<Bid>,
     private readonly userService: UsersService,
     // private readonly offerService: AcceptOfferService,
-  ) {}
+  ) {
+    this.provider = new ethers.WebSocketProvider(
+      'wss://curtis.rpc.caldera.xyz/ws',
+    );
+
+    // Initialize contract
+    this.contract = new ethers.Contract(
+      '0xb91056Df0b692aB60a3d02BbA257320D62129cbC',
+      ABI,
+      this.provider,
+    );
+  }
+
+  private async listenToOfferAccepted() {
+    this.contract.on(
+      'OfferAccepted',
+      async (
+        offerId,
+        web2JobId,
+        jobCreator,
+        freelancer,
+        offerAmount,
+        event,
+      ) => {
+        try {
+          await this.jobModel.findOneAndUpdate(
+            { _id: web2JobId, web3id: null },
+            {
+              web3id: offerId.toString(),
+              $push: {
+                TransactionHashs: {
+                  type: 'OfferAccepted',
+                  hash: event.log.transactionHash,
+                },
+              },
+            },
+          );
+        } catch (e) {
+          console.error('listenToOfferAccepted', e);
+        }
+      },
+    );
+
+    console.log('Listening for OfferAccepted events...');
+  }
+
+  async onModuleInit() {
+    await this.listenToOfferAccepted();
+  }
 
   async createJob(sub: string, dto: JobInput) {
     const { bid_week } = dto;
@@ -318,5 +377,11 @@ export class JobsService {
       .exec();
 
     return { approvedBids, pendingBids, expiredBids };
+  }
+
+  async onApplicationShutdown() {
+    // Clean up listeners
+    this.contract.removeAllListeners('OfferAccepted');
+    console.log('Stopped listening for events');
   }
 }

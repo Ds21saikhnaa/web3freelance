@@ -3,6 +3,15 @@ import { User } from 'src/users/entities/user.entity';
 import mongoose from 'mongoose';
 import { JobStatus } from '../enum';
 
+@Schema({ timestamps: false, _id: false })
+class TransactionHash {
+  @Prop()
+  type: string;
+  @Prop()
+  hash: string;
+}
+const TransactionHashSchema = SchemaFactory.createForClass(TransactionHash);
+
 @Schema({ timestamps: true })
 export class Bid {
   @Prop({ type: 'ObjectId', ref: 'User', required: true })
@@ -30,6 +39,12 @@ export class Bid {
 @Schema({ timestamps: true })
 export class Job {
   _id: string;
+
+  @Prop({ sparse: true, default: null })
+  web3id: string;
+
+  @Prop({ type: [TransactionHashSchema] })
+  TransactionHashs: TransactionHash[];
 
   @Prop({ type: String })
   hash: string;
