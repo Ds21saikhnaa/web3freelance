@@ -94,7 +94,7 @@ export class User {
   @ArrayMaxSize(3, { message: 'You can create a maximum of 3 budget.' })
   budget: Budget[];
 
-  @Prop({ type: String, default: null })
+  @Prop({ type: String, default: null, select: false })
   nonce: string | null;
 
   @Prop({ type: Date, default: new Date() })

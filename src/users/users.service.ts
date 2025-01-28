@@ -127,7 +127,11 @@ export class UsersService {
   }
 
   async findOneWeb3(address: string) {
-    const user = await this.userModel.findOne({ web3address: address });
+    const user = await this.userModel
+      .findOne({
+        web3address: address,
+      })
+      .select('+nonce');
     return user;
   }
 
