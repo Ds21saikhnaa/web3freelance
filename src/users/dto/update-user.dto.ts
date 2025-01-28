@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
   IsNumber,
@@ -16,9 +17,9 @@ class BudgetType {
   @IsString({ message: 'The day must be a string' })
   day: string;
 
-  @ApiProperty({ description: 'The description of the budget' })
+  @ApiProperty({ type: [String] })
   @IsString({ message: 'The description must be a string' })
-  description: string;
+  description: string[];
 }
 
 export class UpdateUserDto {
@@ -31,9 +32,15 @@ export class UpdateUserDto {
   @ArrayNotEmpty()
   bio: string;
 
-  @ApiProperty({})
-  @ValidateNested()
-  budget: BudgetType;
+  @ApiProperty({
+    type: [BudgetType],
+    description: 'The budget details (max 3 budgets allowed)',
+  })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @ArrayMaxSize(3, { message: 'You can create a maximum of 3 budgets.' })
+  budget: BudgetType[];
 
   @ApiProperty({ type: [String] })
   job_roles: string[];
