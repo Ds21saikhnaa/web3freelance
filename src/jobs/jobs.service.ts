@@ -14,13 +14,7 @@ import { JobStatus } from './enum';
 import { QueryDto } from './dto/query.dto';
 import { decrypt, encrypt, PaginationDto } from '../utils';
 import { UsersService } from '../users/users.service';
-import {
-  BigNumberish,
-  ethers,
-  formatEther,
-  formatUnits,
-  getBigInt,
-} from 'ethers';
+import { ethers } from 'ethers';
 import { ABI } from './dto/abi';
 
 @Injectable()
