@@ -60,6 +60,22 @@ export class JobsController {
   }
 
   @ApiBearerAuth()
+  @Get('get-offer/me')
+  @UseGuards(AuthGuard('jwt'))
+  getMeOffer(@Request() req: any) {
+    const { sub } = req.user;
+    return this.jobsService.getMeOffer(sub);
+  }
+
+  @ApiBearerAuth()
+  @Get('send-offer/me')
+  @UseGuards(AuthGuard('jwt'))
+  sendMeOffer(@Request() req: any) {
+    const { sub } = req.user;
+    return this.jobsService.sendMeOffer(sub);
+  }
+
+  @ApiBearerAuth()
   @Get('bids/me')
   @UseGuards(AuthGuard('jwt'))
   meBids(@Request() req: any) {

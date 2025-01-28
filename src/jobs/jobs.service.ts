@@ -378,4 +378,18 @@ export class JobsService implements OnModuleInit {
     this.contract.removeAllListeners('OfferAccepted');
     console.log('Stopped listening for events');
   }
+
+  async getMeOffer(sub: string) {
+    return await this.jobModel
+      .find({ req: sub, status: JobStatus.Open })
+      .populate('client', '-reward -job_roles -skills')
+      .exec();
+  }
+
+  async sendMeOffer(sub: string) {
+    return await this.jobModel
+      .find({ client: sub, req: { $exists: true }, status: JobStatus.Open })
+      .populate('client', '-reward -job_roles -skills')
+      .exec();
+  }
 }

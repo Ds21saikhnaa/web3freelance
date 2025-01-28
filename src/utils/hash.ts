@@ -20,6 +20,7 @@ export function encrypt(
   const jsonString = JSON.stringify({
     _id: data._id,
     title: data.title,
+    duration_time: data.duration_time,
     description: data.description,
     gig_budget: data.gig_budget,
   });
