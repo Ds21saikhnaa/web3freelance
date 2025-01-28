@@ -69,6 +69,9 @@ export class Job {
 
   @Prop({ type: Date })
   bid_day_end: Date;
+
+  @Prop({ type: 'ObjectId', ref: 'User' })
+  req?: User | mongoose.Types.ObjectId;
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

@@ -2,11 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   ArrayNotEmpty,
   IsArray,
+  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { PricePackage } from '../../users/enum';
 
 export class JobInput {
   @ApiProperty({})
@@ -40,6 +42,23 @@ export class JobInput {
   @ApiProperty({})
   @IsNumber()
   gig_budget: number;
+
+  @ApiProperty({})
+  @IsNumber()
+  bid_week: number;
+}
+
+export class ReqJobInput {
+  @ApiProperty({})
+  @IsMongoId()
+  userId: string;
+
+  @ApiProperty({})
+  type: PricePackage;
+
+  @ApiProperty({})
+  @IsString({ message: 'The delivery time must be a string' })
+  duration_time: string;
 
   @ApiProperty({})
   @IsNumber()

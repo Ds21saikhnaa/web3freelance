@@ -5,13 +5,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateBidDto, JobInput } from './dto/create-job.dto';
+import { CreateBidDto, JobInput, ReqJobInput } from './dto/create-job.dto';
 import { Bid, Job } from './entities/jobs.entity';
 import { JobStatus } from './enum';
 // import { AcceptOfferService } from '../accept-offer/accept-offer.service';
 // import { CreateAcceptOfferDto } from '../accept-offer/dto/create-accept-offer.dto';
 import { QueryDto } from './dto/query.dto';
 import { decrypt, encrypt, PaginationDto } from '../utils';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class JobsService {
@@ -20,6 +21,7 @@ export class JobsService {
     private jobModel: Model<Job>,
     @InjectModel(Bid.name)
     private bidModel: Model<Bid>,
+    private readonly userService: UsersService,
     // private readonly offerService: AcceptOfferService,
   ) {}
 
@@ -30,6 +32,31 @@ export class JobsService {
       client: sub,
       bid_day_end: new Date(Date.now() + bid_week * 7 * 24 * 60 * 60 * 1000),
       ...dto,
+    });
+
+    await job.save();
+    return job;
+  }
+
+  async createOfferJob(sub: string, dto: ReqJobInput) {
+    const { bid_week, userId, type, duration_time } = dto;
+    const user = await this.userService.me(userId);
+    if (!user.budget.length) {
+      new BadRequestException('tier not found');
+    }
+    const tier = user.budget.find((el) => el.type === type);
+    delete dto.bid_week;
+    const job = new this.jobModel({
+      title: type,
+      description: tier.description,
+      main_category: user.job_roles[0] || '',
+      categories: [],
+      requirement: user.skills,
+      client: sub,
+      duration_time,
+      gig_budget: tier.amount,
+      req: user._id,
+      bid_day_end: new Date(Date.now() + bid_week * 7 * 24 * 60 * 60 * 1000),
     });
 
     await job.save();

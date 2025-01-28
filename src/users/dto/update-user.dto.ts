@@ -7,8 +7,11 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { PricePackage } from '../enum';
 
 class BudgetType {
+  @ApiProperty()
+  type: PricePackage;
   @ApiProperty({ description: 'The amount for the budget' })
   @IsNumber({}, { message: 'The amount must be a number' })
   amount: number;

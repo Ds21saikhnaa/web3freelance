@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
-import { CreateBidDto, JobInput } from './dto/create-job.dto';
+import { CreateBidDto, JobInput, ReqJobInput } from './dto/create-job.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { QueryDto } from './dto/query.dto';
 import { PaginationDto } from '../utils';
@@ -26,6 +26,14 @@ export class JobsController {
   createTask(@Request() req: any, @Body() dto: JobInput) {
     const { sub } = req.user;
     return this.jobsService.createJob(sub, dto);
+  }
+
+  @ApiBearerAuth()
+  @Post('offer')
+  @UseGuards(AuthGuard('jwt'))
+  createOfferJob(@Request() req: any, @Body() dto: ReqJobInput) {
+    const { sub } = req.user;
+    return this.jobsService.createOfferJob(sub, dto);
   }
 
   @Get('')

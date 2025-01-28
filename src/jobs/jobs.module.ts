@@ -3,6 +3,7 @@ import { JobsService } from './jobs.service';
 import { JobsController } from './jobs.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Bid, BidSchema, Job, JobSchema } from './entities/jobs.entity';
+import { UsersModule } from '../users/users.module';
 // import { AcceptOfferModule } from '../accept-offer/accept-offer.module';
 
 @Module({
@@ -23,6 +24,7 @@ import { Bid, BidSchema, Job, JobSchema } from './entities/jobs.entity';
         },
       },
     ]),
+    UsersModule,
     // AcceptOfferModule,
   ],
   controllers: [JobsController],
