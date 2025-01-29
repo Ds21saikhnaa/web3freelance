@@ -60,6 +60,11 @@ export class ReqJobInput {
   @IsString({ message: 'The delivery time must be a string' })
   duration_time: string;
 
+  @ApiProperty()
+  @IsArray()
+  @ArrayNotEmpty()
+  description: string;
+
   @ApiProperty({})
   @IsNumber()
   bid_week: number;

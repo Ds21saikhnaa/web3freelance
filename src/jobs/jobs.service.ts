@@ -92,7 +92,10 @@ export class JobsService implements OnModuleInit {
   }
 
   async createOfferJob(sub: string, dto: ReqJobInput) {
-    const { bid_week, userId, type, duration_time } = dto;
+    const { bid_week, userId, type, duration_time, description } = dto;
+    if (userId === sub) {
+      throw new BadRequestException('Something went wrong');
+    }
     const user = await this.userService.me(userId);
     if (!user.budget.length) {
       new BadRequestException('tier not found');
@@ -101,7 +104,7 @@ export class JobsService implements OnModuleInit {
     delete dto.bid_week;
     const job = new this.jobModel({
       title: type,
-      description: tier.description,
+      description: description,
       main_category: user.job_roles[0] || '',
       categories: [],
       requirement: user.skills,
@@ -130,6 +133,7 @@ export class JobsService implements OnModuleInit {
     // Build search options
     const options: Record<string, any> = {
       status: JobStatus.Open,
+      req: { $exists: false },
     };
 
     // Add search filters if provided
@@ -172,6 +176,7 @@ export class JobsService implements OnModuleInit {
     // Build search options
     const options: Record<string, any> = {
       client: userId,
+      req: { $exists: false },
     };
 
     // Add search filters if provided
