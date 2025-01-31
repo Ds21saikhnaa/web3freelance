@@ -75,6 +75,9 @@ export class User {
   @Prop({ type: ['ObjectId'], ref: 'Job', default: [] })
   saved_jobs: Job[] | mongoose.Types.ObjectId[];
 
+  @Prop({ type: ['ObjectId'], ref: 'User', default: [] })
+  saved_profile: User[] | mongoose.Types.ObjectId[];
+
   @Prop({ type: [String], default: [] })
   badges: string[];
 

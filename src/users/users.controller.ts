@@ -76,4 +76,20 @@ export class UsersController {
     const { sub } = req.user;
     return this.usersService.removeJob(sub, id);
   }
+
+  @ApiBearerAuth()
+  @Post('saveUser/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  saveUser(@Request() req: any, @Param('userId') id: string) {
+    const { sub } = req.user;
+    return this.usersService.saveUser(sub, id);
+  }
+
+  @ApiBearerAuth()
+  @Delete('removeUser/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  removeUser(@Request() req: any, @Param('userId') id: string) {
+    const { sub } = req.user;
+    return this.usersService.removeUser(sub, id);
+  }
 }

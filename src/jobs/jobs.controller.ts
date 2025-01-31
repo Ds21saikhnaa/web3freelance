@@ -76,6 +76,22 @@ export class JobsController {
   }
 
   @ApiBearerAuth()
+  @Post('reject-offer/:id')
+  @UseGuards(AuthGuard('jwt'))
+  rejectOffer(@Request() req: any, @Param('id') id: string) {
+    const { sub } = req.user;
+    return this.jobsService.rejectOffer(sub, id);
+  }
+
+  @ApiBearerAuth()
+  @Post('reject-job/:id')
+  @UseGuards(AuthGuard('jwt'))
+  rejectJob(@Request() req: any, @Param('id') id: string) {
+    const { sub } = req.user;
+    return this.jobsService.rejectClientJob(sub, id);
+  }
+
+  @ApiBearerAuth()
   @Get('bids/me')
   @UseGuards(AuthGuard('jwt'))
   meBids(@Request() req: any) {

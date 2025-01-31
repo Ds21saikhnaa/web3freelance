@@ -386,15 +386,46 @@ export class JobsService implements OnModuleInit {
 
   async getMeOffer(sub: string) {
     return await this.jobModel
-      .find({ req: sub, status: JobStatus.Open })
+      .find({
+        req: sub,
+        status: { $in: [JobStatus.Open, JobStatus.Cancelled] },
+      })
       .populate('client', '-reward -job_roles -skills')
+      .populate('req', '-reward -job_roles -skills')
       .exec();
   }
 
   async sendMeOffer(sub: string) {
     return await this.jobModel
-      .find({ client: sub, req: { $exists: true }, status: JobStatus.Open })
+      .find({
+        client: sub,
+        req: { $exists: true },
+        status: { $in: [JobStatus.Open, JobStatus.Cancelled] },
+      })
       .populate('client', '-reward -job_roles -skills')
+      .populate('req', '-reward -job_roles -skills')
       .exec();
+  }
+
+  async rejectOffer(sub: string, id: string) {
+    const update = await this.jobModel.findOneAndUpdate(
+      { _id: id, req: sub, status: JobStatus.Open },
+      { status: JobStatus.Cancelled, bids: null },
+    );
+    if (!update) {
+      throw new BadRequestException(`Can't action`);
+    }
+    return !!update;
+  }
+
+  async rejectClientJob(sub: string, id: string) {
+    const update = await this.jobModel.findOneAndUpdate(
+      { _id: id, client: sub, web3id: null },
+      { status: JobStatus.Cancelled },
+    );
+    if (!update) {
+      throw new BadRequestException(`Can't action`);
+    }
+    return !!update;
   }
 }

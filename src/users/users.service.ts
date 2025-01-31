@@ -93,7 +93,7 @@ export class UsersService {
   async me(sub: string) {
     const user = await this.userModel
       .findById(sub)
-      .populate('saved_jobs')
+      .populate('saved_profile')
       .populate({
         path: 'reviews.job',
       })
@@ -194,6 +194,37 @@ export class UsersService {
 
     if (updateResult.modifiedCount === 0) {
       throw new BadRequestException('Job not found in saved jobs');
+    }
+    return !!user;
+  }
+
+  async saveUser(sub: string, userId: string) {
+    if (sub === userId) {
+      throw new BadRequestException(`It's you!`);
+    }
+    const user = await this.me(sub);
+    await this.me(userId);
+    const savedJob = await this.userModel.findOne({
+      _id: sub,
+      saved_profile: { $in: userId },
+    });
+    if (savedJob) {
+      throw new BadRequestException('you already saved this user');
+    }
+    user.saved_profile.push(userId as any);
+    await user.save();
+    return user;
+  }
+
+  async removeUser(sub: string, userId: string) {
+    const user = await this.me(sub);
+    const updateResult = await this.userModel.updateOne(
+      { _id: sub },
+      { $pull: { saved_profile: userId } },
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      throw new BadRequestException('User not found in saved users');
     }
     return !!user;
   }
