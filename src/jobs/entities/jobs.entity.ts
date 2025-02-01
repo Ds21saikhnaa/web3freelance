@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from 'src/users/entities/user.entity';
 import mongoose from 'mongoose';
 import { JobStatus } from '../enum';
+import { DateEnum } from '../../utils';
 
 @Schema({ timestamps: false, _id: false })
 class TransactionHash {
@@ -55,8 +56,11 @@ export class Job {
   @Prop()
   description: any[];
 
-  @Prop({ type: String })
-  duration_time: string;
+  @Prop({ type: Number })
+  duration_time: number;
+
+  @Prop({ type: String, enum: DateEnum })
+  duration_time_type: DateEnum;
 
   @Prop({ type: String, enum: JobStatus, default: JobStatus.Open })
   status: JobStatus;
@@ -69,6 +73,9 @@ export class Job {
 
   @Prop({ type: [String] })
   requirement: string[];
+
+  @Prop({ type: [String] })
+  badges: string[];
 
   @Prop({ type: 'ObjectId', ref: 'User', required: true })
   client: User | mongoose.Types.ObjectId;

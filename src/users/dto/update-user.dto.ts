@@ -12,13 +12,14 @@ import { PricePackage } from '../enum';
 class BudgetType {
   @ApiProperty()
   type: PricePackage;
+
   @ApiProperty({ description: 'The amount for the budget' })
   @IsNumber({}, { message: 'The amount must be a number' })
   amount: number;
 
   @ApiProperty({ description: 'The day of the budget' })
-  @IsString({ message: 'The day must be a string' })
-  day: string;
+  @IsNumber()
+  day: number;
 
   @ApiProperty({ type: [String] })
   @IsString({ message: 'The description must be a string' })

@@ -25,7 +25,7 @@ export class Budget {
   type: PricePackage;
   @Prop({ type: Number })
   amount: number;
-  @Prop({ type: String })
+  @Prop({ type: Number })
   day: string;
   @Prop({ type: [String] })
   description: string[];

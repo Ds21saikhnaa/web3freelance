@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { PaginationDto } from '../../utils';
+import { DateEnum, PaginationDto } from '../../utils';
 
 export class QueryDto extends PaginationDto {
   @ApiPropertyOptional({ type: String })
@@ -13,4 +13,13 @@ export class QueryDto extends PaginationDto {
 
   @ApiPropertyOptional({ type: Number })
   maxBudget: number;
+
+  @ApiPropertyOptional({ type: Number })
+  duration_time: number;
+
+  @ApiPropertyOptional({ type: String, enum: DateEnum })
+  duration_time_type: DateEnum;
+
+  @ApiPropertyOptional({ type: String })
+  badge: string;
 }

@@ -92,7 +92,14 @@ export class JobsService implements OnModuleInit {
   }
 
   async createOfferJob(sub: string, dto: ReqJobInput) {
-    const { bid_week, userId, type, duration_time, description } = dto;
+    const {
+      bid_week,
+      userId,
+      type,
+      duration_time,
+      description,
+      duration_time_type,
+    } = dto;
     if (userId === sub) {
       throw new BadRequestException('Something went wrong');
     }
@@ -110,6 +117,8 @@ export class JobsService implements OnModuleInit {
       requirement: user.skills,
       client: sub,
       duration_time,
+      duration_time_type,
+      badges: user.badges,
       gig_budget: tier.amount,
       req: user._id,
       bid_day_end: new Date(Date.now() + bid_week * 7 * 24 * 60 * 60 * 1000),
@@ -128,6 +137,9 @@ export class JobsService implements OnModuleInit {
       category,
       minBudget,
       maxBudget,
+      duration_time_type,
+      duration_time,
+      badge,
     } = query;
 
     // Build search options
@@ -147,6 +159,15 @@ export class JobsService implements OnModuleInit {
     // Add category filter if provided
     if (category) {
       options.main_category = category;
+    }
+
+    if (duration_time && duration_time_type) {
+      options.duration_time = duration_time;
+      options.duration_time_type = duration_time_type;
+    }
+
+    if (badge) {
+      options.badge = { $in: badge };
     }
 
     if (minBudget !== undefined || maxBudget !== undefined) {
@@ -188,7 +209,7 @@ export class JobsService implements OnModuleInit {
     const jobs = await this.jobModel
       .find(
         options,
-        'title description gig_budget bids duration_time bid_day_end requirement status',
+        'title description gig_budget bids duration_time duration_time_type bid_day_end requirement status',
       )
       .sort(sort)
       .skip(skip)
@@ -321,7 +342,6 @@ export class JobsService implements OnModuleInit {
   }
 
   async roleBack(hash: string) {
-    console.log(hash);
     const job = decrypt(hash);
     const { _id } = job;
     const sysJob = await this.jobModel.findById(_id);

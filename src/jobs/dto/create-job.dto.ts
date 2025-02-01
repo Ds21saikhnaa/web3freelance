@@ -9,8 +9,18 @@ import {
   IsString,
 } from 'class-validator';
 import { PricePackage } from '../../users/enum';
+import { DateEnum } from '../../utils';
 
-export class JobInput {
+export class DateInput {
+  @ApiProperty({})
+  @IsNumber()
+  duration_time: number;
+
+  @ApiProperty()
+  duration_time_type: DateEnum;
+}
+
+export class JobInput extends DateInput {
   @ApiProperty({})
   @IsNotEmpty({ message: 'The title is required' })
   @IsString({ message: 'The title must be a string' })
@@ -20,10 +30,6 @@ export class JobInput {
   @IsArray()
   @ArrayNotEmpty()
   description: string;
-
-  @ApiProperty({})
-  @IsString({ message: 'The delivery time must be a string' })
-  duration_time: string;
 
   @ApiProperty({})
   @IsString({ message: 'The main category must be a string' })
@@ -48,17 +54,13 @@ export class JobInput {
   bid_week: number;
 }
 
-export class ReqJobInput {
+export class ReqJobInput extends DateInput {
   @ApiProperty({})
   @IsMongoId()
   userId: string;
 
   @ApiProperty({})
   type: PricePackage;
-
-  @ApiProperty({})
-  @IsString({ message: 'The delivery time must be a string' })
-  duration_time: string;
 
   @ApiProperty()
   @IsArray()
