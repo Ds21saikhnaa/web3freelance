@@ -64,6 +64,10 @@ export class ChatService {
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .populate({
+        path: 'participants',
+        select: 'userName profile web3address',
+      })
       .exec();
 
     return { chats, totalPage: totalPages };
@@ -81,7 +85,7 @@ export class ChatService {
   }
 
   async findAllOneChat(id: string, sub: string, query: QueryDto) {
-    const { page = 1, sort = '-createdAt', limit = 10 } = query;
+    const { page = 1, sort = 'createdAt', limit = 10 } = query;
     const chat = await this.findOne(id, sub);
     const options: Record<string, any> = {
       chatId: chat._id,

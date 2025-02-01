@@ -6,8 +6,21 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { WsAuthGuard } from '../auth/ws-auth.guard';
+import { UseGuards } from '@nestjs/common';
 
-@WebSocketGateway({ cors: true })
+// @WebSocketGateway({ cors: true })
+@WebSocketGateway({
+  cors: {
+    origin: [
+      'http://localhost:3001',
+      'https://apelance.com',
+      'http://localhost:3000',
+    ],
+    credentials: true,
+  },
+})
+// @UseGuards(WsAuthGuard)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
@@ -22,6 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   handleMessage(client: Socket, payload: any): void {
     const { chatId, message, sender } = payload;
+    console.log(`Client sent: ${client.id}: ${message}`);
     this.server.to(chatId).emit('receiveMessage', { chatId, message, sender });
   }
 
