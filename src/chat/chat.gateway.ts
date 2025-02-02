@@ -1,15 +1,16 @@
+import { UseGuards } from '@nestjs/common';
 import {
   WebSocketGateway,
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { WsAuthGuard } from '../auth/ws-auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { WsGuard } from './ws.guard';
+import { ChatService } from './chat.service';
 
-// @WebSocketGateway({ cors: true })
 @WebSocketGateway({
   cors: {
     origin: [
@@ -20,34 +21,52 @@ import { UseGuards } from '@nestjs/common';
     credentials: true,
   },
 })
-// @UseGuards(WsAuthGuard)
+@UseGuards(WsGuard)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private chatService: ChatService) {}
+
   @WebSocketServer() server: Server;
 
-  handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
-  }
+  handleConnection(client: Socket) {}
 
-  handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
-  }
+  handleDisconnect(client: Socket) {}
 
   @SubscribeMessage('sendMessage')
-  handleMessage(client: Socket, payload: any): void {
-    const { chatId, message, sender } = payload;
-    console.log(`Client sent: ${client.id}: ${message}`);
-    this.server.to(chatId).emit('receiveMessage', { chatId, message, sender });
+  async handleMessage(client: Socket, { chatId, message }: any) {
+    try {
+      const sub = await this.chatService.canActivate(client, chatId);
+      if (sub) {
+        await this.chatService.createMessage(sub, { chatId, message });
+        this.server
+          .to(chatId)
+          .emit('receiveMessage', { chatId, message, sender: sub });
+      } else throw new WsException('Forbidden');
+    } catch {
+      throw new WsException('Forbidden');
+    }
   }
 
   @SubscribeMessage('joinChat')
-  handleJoinChat(client: Socket, chatId: string): void {
-    client.join(chatId);
-    console.log(`Client ${client.id} joined chat ${chatId}`);
+  async handleJoinChat(client: Socket, { chatId }: any) {
+    try {
+      const sub = await this.chatService.canActivate(client, chatId);
+      if (sub) {
+        client.join(chatId);
+      } else throw new WsException('Forbidden');
+    } catch {
+      throw new WsException('Forbidden');
+    }
   }
 
   @SubscribeMessage('leaveChat')
-  handleLeaveChat(client: Socket, chatId: string): void {
-    client.leave(chatId);
-    console.log(`Client ${client.id} left chat ${chatId}`);
+  async handleLeaveChat(client: Socket, { chatId }: any) {
+    try {
+      const sub = await this.chatService.canActivate(client, chatId);
+      if (sub) {
+        client.leave(chatId);
+      } else throw new WsException('Forbidden');
+    } catch {
+      throw new WsException('Forbidden');
+    }
   }
 }

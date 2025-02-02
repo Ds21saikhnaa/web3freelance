@@ -8,15 +8,16 @@ import { UpdateMessageDto } from './dto/update-chat.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Chat, Message } from './entities/chat.entity';
 import { ClientSession, Model } from 'mongoose';
-import { ChatGateway } from './chat.gateway';
 import { QueryDto } from './dto/query.dto';
+import { Socket } from 'socket.io';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class ChatService {
   constructor(
+    private authService: AuthService,
     @InjectModel(Chat.name) private readonly chatModel: Model<Chat>,
     @InjectModel(Message.name) private readonly messageModel: Model<Message>,
-    private readonly chatGateway: ChatGateway,
   ) {}
   async create(sub: string, createChatDto: CreateChatDto) {
     const { toUser, job } = createChatDto;
@@ -51,23 +52,13 @@ export class ChatService {
 
   async createMessage(sub: string, dto: CreateMessageDto) {
     const { chatId, message } = dto;
-    const chat = await this.chatModel.findOne({
-      _id: chatId,
-      participants: { $in: sub },
-    });
-
-    if (!chat) {
-      throw new BadRequestException('Something went wrong');
-    }
     const newMessage = new this.messageModel({
       sender: sub,
       chatId,
       message,
     });
     await newMessage.save();
-
-    this.chatGateway.server.to(chatId).emit('receiveMessage', newMessage);
-    return newMessage;
+    return;
   }
 
   async findMe(sub: string, query: QueryDto) {
@@ -152,5 +143,19 @@ export class ChatService {
       );
     }
     return message;
+  }
+
+  async canActivate(client: Socket, chatId: string) {
+    const bearerToken = client.handshake.auth.Authorization.split(' ')[1];
+    const { sub }: { sub: string } =
+      this.authService.decodePayload(bearerToken);
+    const chat = await this.chatModel.findOne(
+      {
+        _id: chatId,
+        participants: sub,
+      },
+      '_id',
+    );
+    return !!chat ? sub : false;
   }
 }

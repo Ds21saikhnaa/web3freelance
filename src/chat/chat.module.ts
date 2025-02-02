@@ -9,6 +9,7 @@ import {
   MessageSchema,
 } from './entities/chat.entity';
 import { ChatGateway } from './chat.gateway';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ChatGateway } from './chat.gateway';
         },
       },
     ]),
+    AuthModule,
   ],
   controllers: [ChatController],
   providers: [ChatService, ChatGateway],

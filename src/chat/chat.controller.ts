@@ -11,7 +11,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { CreateChatDto, CreateMessageDto } from './dto/create-chat.dto';
+import { CreateChatDto } from './dto/create-chat.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { QueryDto } from './dto/query.dto';
@@ -28,12 +28,6 @@ export class ChatController {
   create(@Request() req: any, @Body() createChatDto: CreateChatDto) {
     const { sub } = req.user;
     return this.chatService.create(sub, createChatDto);
-  }
-
-  @Post('message')
-  createMessage(@Request() req: any, @Body() dto: CreateMessageDto) {
-    const { sub } = req.user;
-    return this.chatService.createMessage(sub, dto);
   }
 
   @Get('me')

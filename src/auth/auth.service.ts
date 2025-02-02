@@ -76,4 +76,16 @@ export class AuthService {
     const token = await this.jwtService.signAsync(payload);
     return token;
   }
+
+  verifyToken(token: string) {
+    return this.jwtService.verify(token);
+  }
+
+  decodePayload(token: string) {
+    const decoded = this.jwtService.decode(token);
+    if (!decoded || typeof decoded === 'string') {
+      throw new Error('Invalid token payload');
+    }
+    return decoded as any;
+  }
 }
