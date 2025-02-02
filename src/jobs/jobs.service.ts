@@ -152,10 +152,7 @@ export class JobsService implements OnModuleInit {
 
     // Add search filters if provided
     if (search) {
-      options.$or = [
-        { description: new RegExp(search, 'i') },
-        { name: new RegExp(search, 'i') },
-      ];
+      options.$or = [{ title: new RegExp(search, 'i') }];
     }
 
     // Add category filter if provided

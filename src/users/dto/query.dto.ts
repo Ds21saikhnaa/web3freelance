@@ -3,6 +3,9 @@ import { PaginationDto } from '../../utils';
 
 export class QueryDto extends PaginationDto {
   @ApiPropertyOptional({ type: String })
+  search: string;
+
+  @ApiPropertyOptional({ type: String })
   category: string;
 
   @ApiPropertyOptional({ type: [String] })

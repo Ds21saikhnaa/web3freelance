@@ -48,6 +48,7 @@ export class UsersService {
       skills,
       minBudget,
       maxBudget,
+      search,
       badge,
     } = query;
 
@@ -60,6 +61,10 @@ export class UsersService {
     // Add category filter if provided
     if (category) {
       options.job_roles = { $in: category };
+    }
+
+    if (search) {
+      options.$or = [{ userName: new RegExp(search, 'i') }];
     }
 
     if (skills) {
