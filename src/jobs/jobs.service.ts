@@ -16,6 +16,7 @@ import { decrypt, encrypt, PaginationDto } from '../utils';
 import { UsersService } from '../users/users.service';
 import { ethers } from 'ethers';
 import { ABI } from './dto/abi';
+import { ChatService } from '../chat/chat.service';
 
 @Injectable()
 export class JobsService implements OnModuleInit {
@@ -27,6 +28,7 @@ export class JobsService implements OnModuleInit {
     @InjectModel(Bid.name)
     private bidModel: Model<Bid>,
     private readonly userService: UsersService,
+    private readonly chatService: ChatService,
     // private readonly offerService: AcceptOfferService,
   ) {
     this.provider = new ethers.WebSocketProvider(
@@ -334,6 +336,12 @@ export class JobsService implements OnModuleInit {
       job.gig_budget = bid.amount;
       job.hash = encrypt(job);
       await job.save({ session });
+      await this.chatService.createRoom(
+        userId,
+        job.client._id.toString(),
+        jobId,
+        session,
+      );
       await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
@@ -356,6 +364,7 @@ export class JobsService implements OnModuleInit {
     sysJob.hash = null;
     await sysJob.save();
     await this.bidModel.updateMany({ job: sysJob._id }, { isSelected: false });
+    await this.chatService.deleteRoom(_id);
     return sysJob;
   }
 

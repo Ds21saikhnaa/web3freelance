@@ -7,7 +7,7 @@ import { CreateChatDto, CreateMessageDto } from './dto/create-chat.dto';
 import { UpdateMessageDto } from './dto/update-chat.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Chat, Message } from './entities/chat.entity';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 import { ChatGateway } from './chat.gateway';
 import { QueryDto } from './dto/query.dto';
 
@@ -19,15 +19,34 @@ export class ChatService {
     private readonly chatGateway: ChatGateway,
   ) {}
   async create(sub: string, createChatDto: CreateChatDto) {
-    const { toUser } = createChatDto;
+    const { toUser, job } = createChatDto;
     if (toUser === sub) {
       throw new BadRequestException('Something went wrong');
     }
     const newChat = new this.chatModel({
+      job,
       participants: [sub, toUser],
     });
     await newChat.save();
     return newChat;
+  }
+
+  async createRoom(
+    client: string,
+    lancer: string,
+    job: string,
+    session: ClientSession,
+  ) {
+    const newChat = new this.chatModel({
+      job: job,
+      participants: [client, lancer],
+    });
+    await newChat.save({ session });
+    return newChat;
+  }
+
+  async deleteRoom(id: string) {
+    return await this.chatModel.findOneAndDelete({ job: id });
   }
 
   async createMessage(sub: string, dto: CreateMessageDto) {

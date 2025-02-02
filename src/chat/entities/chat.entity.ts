@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from '../../users/entities/user.entity';
 import mongoose from 'mongoose';
+import { Job } from '../../jobs/entities/jobs.entity';
 
 @Schema({ timestamps: true })
 export class Chat {
@@ -12,6 +13,9 @@ export class Chat {
 
   @Prop({ type: String, required: false })
   groupName: string;
+
+  @Prop({ type: 'ObjectId', ref: 'Job' })
+  job: Job | mongoose.Types.ObjectId;
 }
 
 @Schema({ timestamps: true })

@@ -5,6 +5,10 @@ export class CreateChatDto {
   @ApiProperty({})
   @IsMongoId({ message: 'the toUser must be a mongoid' })
   toUser: string;
+
+  @ApiProperty({})
+  @IsMongoId()
+  job: string;
 }
 
 export class CreateMessageDto {
