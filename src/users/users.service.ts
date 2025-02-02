@@ -48,6 +48,7 @@ export class UsersService {
       skills,
       minBudget,
       maxBudget,
+      badge,
     } = query;
 
     // Build search options
@@ -63,6 +64,10 @@ export class UsersService {
 
     if (skills) {
       options.skills = { $in: skills };
+    }
+
+    if (badge) {
+      options.badges = { $in: badge };
     }
 
     if (minBudget !== undefined || maxBudget !== undefined) {

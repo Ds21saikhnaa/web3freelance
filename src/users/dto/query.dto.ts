@@ -13,4 +13,7 @@ export class QueryDto extends PaginationDto {
 
   @ApiPropertyOptional({ type: Number })
   maxBudget: number;
+
+  @ApiPropertyOptional({ type: String })
+  badge: string;
 }

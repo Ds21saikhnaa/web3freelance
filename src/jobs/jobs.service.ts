@@ -169,7 +169,7 @@ export class JobsService implements OnModuleInit {
     }
 
     if (badge) {
-      options.badge = { $in: badge };
+      options.badges = { $in: badge };
     }
 
     if (minBudget !== undefined || maxBudget !== undefined) {
