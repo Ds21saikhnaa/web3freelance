@@ -24,8 +24,11 @@ export class Bid {
   @Prop()
   amount: number;
 
-  @Prop({ type: String })
-  duration_time: string;
+  @Prop({ required: true, type: Number })
+  duration_time: number;
+
+  @Prop({ required: true, type: String, enum: DateEnum })
+  duration_time_type: DateEnum;
 
   @Prop({ type: String })
   description: string;
@@ -56,10 +59,10 @@ export class Job {
   @Prop()
   description: any[];
 
-  @Prop({ type: Number })
+  @Prop({ required: true, type: Number })
   duration_time: number;
 
-  @Prop({ type: String, enum: DateEnum })
+  @Prop({ required: true, type: String, enum: DateEnum })
   duration_time_type: DateEnum;
 
   @Prop({ type: String, enum: JobStatus, default: JobStatus.Open })

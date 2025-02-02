@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   ArrayNotEmpty,
   IsArray,
+  IsEnum,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
@@ -79,9 +80,14 @@ export class CreateBidDto {
   amount: number;
 
   @ApiProperty({})
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  duration_time: string;
+  duration_time: number;
+
+  @ApiProperty({})
+  @IsEnum(DateEnum)
+  @IsOptional()
+  duration_time_type: DateEnum;
 
   @ApiProperty({})
   @IsString()

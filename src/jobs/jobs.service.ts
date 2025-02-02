@@ -209,7 +209,7 @@ export class JobsService implements OnModuleInit {
     const jobs = await this.jobModel
       .find(
         options,
-        'title description gig_budget bids duration_time duration_time_type bid_day_end requirement status',
+        'title description gig_budget bids duration_time duration_time_type bid_day_end requirement status web3id',
       )
       .sort(sort)
       .skip(skip)
@@ -265,6 +265,8 @@ export class JobsService implements OnModuleInit {
         `The bid date for this job creation has ended.`,
       );
     }
+    console.log('pre', createBidDto);
+
     const newBid = new this.bidModel({
       job: jobId,
       user: userId,
@@ -272,6 +274,7 @@ export class JobsService implements OnModuleInit {
       ...createBidDto,
       isSelected: false,
     });
+    console.log('post', createBidDto);
 
     const session = await this.bidModel.db.startSession();
     session.startTransaction();
