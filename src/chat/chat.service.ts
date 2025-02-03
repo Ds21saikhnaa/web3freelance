@@ -58,7 +58,7 @@ export class ChatService {
       message,
     });
     await newMessage.save();
-    return;
+    return newMessage._id;
   }
 
   async findMe(sub: string, query: QueryDto) {
@@ -106,7 +106,6 @@ export class ChatService {
     const totalPages = Math.ceil(totalChats / limit);
     const messages = await this.messageModel
       .find(options)
-      .populate({ path: 'sender', select: 'web3address userName profile' })
       .sort(sort)
       .skip(skip)
       .limit(limit)

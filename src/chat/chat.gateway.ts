@@ -36,10 +36,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const sub = await this.chatService.canActivate(client, chatId);
       if (sub) {
-        await this.chatService.createMessage(sub, { chatId, message });
+        const _id = await this.chatService.createMessage(sub, {
+          chatId,
+          message,
+        });
         this.server
           .to(chatId)
-          .emit('receiveMessage', { chatId, message, sender: sub });
+          .emit('receiveMessage', { message, sender: sub, _id });
       } else throw new WsException('Forbidden');
     } catch {
       throw new WsException('Forbidden');
