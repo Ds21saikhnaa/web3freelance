@@ -295,7 +295,6 @@ export class JobsService implements OnModuleInit {
         `The bid date for this job creation has ended.`,
       );
     }
-    console.log('pre', createBidDto);
 
     const newBid = new this.bidModel({
       job: jobId,
@@ -304,7 +303,6 @@ export class JobsService implements OnModuleInit {
       ...createBidDto,
       isSelected: false,
     });
-    console.log('post', createBidDto);
 
     const session = await this.bidModel.db.startSession();
     session.startTransaction();
@@ -453,6 +451,10 @@ export class JobsService implements OnModuleInit {
         status: { $in: [JobStatus.Open, JobStatus.Cancelled] },
       })
       .populate('client', '-reward -job_roles -skills')
+      .populate({
+        path: 'bids',
+        populate: { path: 'user', select: '-reward -job_roles -skills' },
+      })
       .populate('req', '-reward -job_roles -skills')
       .exec();
   }
@@ -465,6 +467,10 @@ export class JobsService implements OnModuleInit {
         status: { $in: [JobStatus.Open, JobStatus.Cancelled] },
       })
       .populate('client', '-reward -job_roles -skills')
+      .populate({
+        path: 'bids',
+        populate: { path: 'user', select: '-reward -job_roles -skills' },
+      })
       .populate('req', '-reward -job_roles -skills')
       .exec();
   }
