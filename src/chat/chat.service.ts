@@ -62,7 +62,7 @@ export class ChatService {
   }
 
   async findMe(sub: string, query: QueryDto) {
-    const { page = 1, sort = '-createdAt', limit = 10 } = query;
+    const { page = 1, sort = '-createdAt', limit = 1000 } = query;
     const options: Record<string, any> = {
       participants: { $in: sub },
     };
@@ -95,7 +95,7 @@ export class ChatService {
   }
 
   async findAllOneChat(id: string, sub: string, query: QueryDto) {
-    const { page = 1, sort = 'createdAt', limit = 10 } = query;
+    const { page = 1, sort = 'createdAt', limit = 1000 } = query;
     const chat = await this.findOne(id, sub);
     const options: Record<string, any> = {
       chatId: chat._id,

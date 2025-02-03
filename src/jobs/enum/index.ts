@@ -4,6 +4,8 @@ export enum JobStatus {
   Completed = 'Completed',
   Cancelled = 'Cancelled',
   Paid = 'Paid',
+  PayOut = 'PayOut',
+  Withdrawal = 'Withdrawal',
 }
 
 export enum WorkStatus {

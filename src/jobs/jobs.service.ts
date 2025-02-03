@@ -12,7 +12,7 @@ import { JobStatus } from './enum';
 // import { AcceptOfferService } from '../accept-offer/accept-offer.service';
 // import { CreateAcceptOfferDto } from '../accept-offer/dto/create-accept-offer.dto';
 import { QueryDto } from './dto/query.dto';
-import { decrypt, encrypt, PaginationDto } from '../utils';
+import { convertDate, decrypt, encrypt, PaginationDto } from '../utils';
 import { UsersService } from '../users/users.service';
 import { ethers } from 'ethers';
 import { ABI } from './dto/abi';
@@ -73,7 +73,34 @@ export class JobsService implements OnModuleInit {
       },
     );
 
-    console.log('Listening for OfferAccepted events...');
+    this.contract.on(
+      'PaymentTransferred',
+      async (offerId, freelancer, amount, workStatus, event) => {
+        console.log('ajillaa: ', workStatus);
+        const flag =
+          workStatus === 2 ? 'owner' : workStatus === 3 ? 'freelancer' : 'exit';
+        try {
+          if (flag === 'exit') return;
+          await this.jobModel.findOneAndUpdate(
+            { web3id: offerId },
+            {
+              status:
+                flag === 'owner' ? JobStatus.Withdrawal : JobStatus.PayOut,
+              $push: {
+                TransactionHashs: {
+                  type: 'PaymentTransferred',
+                  hash: event.log.transactionHash,
+                },
+              },
+            },
+          );
+        } catch (e) {
+          console.error('listenToPaymentTransferred', e);
+        }
+      },
+    );
+
+    console.log('Listening for web3 events...');
   }
 
   async onModuleInit() {
@@ -332,6 +359,7 @@ export class JobsService implements OnModuleInit {
       job.status = JobStatus.Paid;
       job.first_budget = job.gig_budget;
       job.gig_budget = bid.amount;
+      job.end_date = convertDate(bid.duration_time, bid.duration_time_type);
       job.hash = encrypt(job);
       await job.save({ session });
       await this.chatService.createRoom(
