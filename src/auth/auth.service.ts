@@ -36,9 +36,13 @@ export class AuthService {
       user = await this.userService.login(address);
       await this.userService.syncNftAndBadges(user._id);
     }
-    const nonce = `Sign this message to authenticate: ${Math.floor(
-      Math.random() * 1000000,
-    )}`;
+    // const nonce = ` Sign this message to authenticate: ${Math.floor(
+    //   Math.random() * 1000000,
+    // )}`;
+    const nonce = `Welcome to ApeLance!\nClick to sign in and accept the OpenSea Terms of Service (https://www.apelance.com/terms) and Privacy Policy (https://www.apelance.com/privacy).
+            \nThis request will not trigger a blockchain transaction or cost any gas fees.
+            \nWallet address:\n${address}
+            \nNonce:\n${Math.floor(Math.random() * 1000000)}`;
     user.nonce = nonce;
     await user.save();
     return { nonce };
