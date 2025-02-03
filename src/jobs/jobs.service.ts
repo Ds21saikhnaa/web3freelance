@@ -364,7 +364,7 @@ export class JobsService implements OnModuleInit {
       await job.save({ session });
       await this.chatService.createRoom(
         userId,
-        bid.user.toString(),
+        bid.user._id.toString(),
         jobId,
         session,
       );
