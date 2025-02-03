@@ -78,6 +78,7 @@ export class ChatService {
         path: 'participants',
         select: 'userName profile web3address',
       })
+      .populate('job', 'title description status')
       .exec();
 
     return { chats, totalPage: totalPages };
