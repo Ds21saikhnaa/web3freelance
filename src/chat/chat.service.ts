@@ -78,7 +78,7 @@ export class ChatService {
         path: 'participants',
         select: 'userName profile web3address',
       })
-      .populate('job', 'title description status')
+      .populate('job', 'web3id title client description status end_date')
       .exec();
 
     return { chats, totalPage: totalPages };
