@@ -32,10 +32,9 @@ export class AuthService {
 
   async getNonce(address: string) {
     let user = await this.userService.findOneWeb3(address);
-    console.log(user);
     if (!user) {
       user = await this.userService.login(address);
-      // await this.userService.syncNftAndBadges(user._id);
+      await this.userService.syncNftAndBadges(user._id);
     }
     const nonce = `Sign this message to authenticate: ${Math.floor(
       Math.random() * 1000000,
