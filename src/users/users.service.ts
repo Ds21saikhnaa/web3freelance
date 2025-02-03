@@ -254,7 +254,7 @@ export class UsersService {
             .filter((badge): badge is string => !!badge), // Filter and assert type
         ),
       );
-      user.badges = badges;
+      user.all_badges = badges;
       user.lastSynced = new Date();
       await user.save();
     }

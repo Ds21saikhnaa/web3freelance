@@ -78,11 +78,15 @@ export class JobsService implements OnModuleInit {
       async (offerId, freelancer, amount, workStatus, event) => {
         console.log('ajillaa: ', workStatus);
         const flag =
-          workStatus === 2 ? 'owner' : workStatus === 3 ? 'freelancer' : 'exit';
+          workStatus === BigInt(2)
+            ? 'owner'
+            : workStatus === BigInt(3)
+              ? 'freelancer'
+              : 'exit';
         try {
           if (flag === 'exit') return;
           await this.jobModel.findOneAndUpdate(
-            { web3id: offerId },
+            { web3id: offerId.toString() },
             {
               status:
                 flag === 'owner' ? JobStatus.Withdrawal : JobStatus.PayOut,

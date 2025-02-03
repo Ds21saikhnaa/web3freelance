@@ -69,8 +69,7 @@ export class User {
   skills: string[];
 
   @Prop({ type: [String], default: [] })
-  @ArrayMaxSize(3, { message: 'You can select a maximum of 3 badges.' })
-  selected_badges: string[];
+  all_badges: string[];
 
   @Prop({ type: ['ObjectId'], ref: 'Job', default: [] })
   saved_jobs: Job[] | mongoose.Types.ObjectId[];
@@ -79,6 +78,7 @@ export class User {
   saved_profile: User[] | mongoose.Types.ObjectId[];
 
   @Prop({ type: [String], default: [] })
+  @ArrayMaxSize(3, { message: 'You can select a maximum of 3 badges.' })
   badges: string[];
 
   @Prop({ type: Number, default: 0 })

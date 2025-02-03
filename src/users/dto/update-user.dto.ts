@@ -53,7 +53,8 @@ export class UpdateUserDto {
   skills: string[];
 
   @ApiProperty({ type: [String] })
-  selected_badges: string[];
+  @ArrayMaxSize(3)
+  badges: string[];
 
   @ApiProperty({})
   @IsString({ message: 'The bio must be a string' })
