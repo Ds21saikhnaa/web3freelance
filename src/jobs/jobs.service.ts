@@ -319,6 +319,7 @@ export class JobsService implements OnModuleInit {
 
     const bid = await this.bidModel
       .findOne({ _id: bidId, job: job._id })
+      .populate('user', 'web3address')
       .exec();
     if (!bid) throw new NotFoundException(`Bid not found`);
 
@@ -346,7 +347,7 @@ export class JobsService implements OnModuleInit {
     } finally {
       session.endSession();
     }
-    return job;
+    return { job, bid };
   }
 
   async roleBack(hash: string) {
