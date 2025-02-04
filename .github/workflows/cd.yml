@@ -29,6 +29,6 @@ jobs:
           -e WEB3_URL=$WEB3_URL
           -e WEB3_API_KEY=$WEB3_API_KEY
           -e SECRET_KEY=$SECRET_KEY
-          -p 8007:3030 --name apelance-container saikhnaa21/apelance
+          -p 8000:3000 --name apelance-container saikhnaa21/apelance
       - name: Cleanup unused images
         run: sudo docker image prune --force
