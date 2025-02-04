@@ -37,7 +37,7 @@ export class JobsService implements OnModuleInit {
 
     // Initialize contract
     this.contract = new ethers.Contract(
-      '0xb91056Df0b692aB60a3d02BbA257320D62129cbC',
+      '0x90AE4aF2B1bdCfB201df1dd97682ea2d0eD1bb9E',
       ABI,
       this.provider,
     );
