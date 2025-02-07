@@ -31,13 +31,11 @@ export class JobsService implements OnModuleInit {
     private readonly chatService: ChatService,
     // private readonly offerService: AcceptOfferService,
   ) {
-    this.provider = new ethers.WebSocketProvider(
-      'wss://curtis.rpc.caldera.xyz/ws',
-    );
+    this.provider = new ethers.WebSocketProvider('wss://rpc.apechain.com/ws');
 
     // Initialize contract
     this.contract = new ethers.Contract(
-      '0x90AE4aF2B1bdCfB201df1dd97682ea2d0eD1bb9E',
+      '0x2EACA6F626Dae5bcf1Df83F3fA140eAD4f5eaf1C',
       ABI,
       this.provider,
     );
