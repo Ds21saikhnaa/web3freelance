@@ -10,8 +10,6 @@ import {
 import { ImageLocation } from './enum';
 
 const ResizeMap: Record<ImageLocation, number> = {
-  [ImageLocation.COVER_H]: 1920,
-  [ImageLocation.COVER_V]: 600,
   [ImageLocation.PROFILE]: 200,
 };
 

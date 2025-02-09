@@ -1,8 +1,6 @@
 import { HeightWitdth, ImageLocation } from '../enum';
 
 export const DimensionMap: Record<ImageLocation, number> = {
-  [ImageLocation.COVER_H]: 3,
-  [ImageLocation.COVER_V]: 1,
   [ImageLocation.PROFILE]: 1,
 };
 
