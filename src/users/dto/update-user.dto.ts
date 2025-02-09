@@ -5,6 +5,7 @@ import {
   IsArray,
   IsNumber,
   IsString,
+  IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { PricePackage } from '../enum';
@@ -59,6 +60,11 @@ export class UpdateUserDto {
   @ApiProperty({})
   @IsString({ message: 'The bio must be a string' })
   twitter: string;
+
+  @ApiProperty({})
+  @IsUrl()
+  @IsString({ message: 'The profile must be a string' })
+  profile: string;
 
   @ApiProperty({})
   @IsString({ message: 'The bio must be a string' })

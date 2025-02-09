@@ -22,6 +22,8 @@ jobs:
           WEB3_URL: ${{secrets.WEB3_URL}}
           WEB3_API_KEY: ${{secrets.WEB3_API_KEY}}
           SECRET_KEY: ${{secrets.SECRET_KEY}}
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
         run: >
           sudo docker run -d
           -e MONGO_URI=$MONGO_URI
@@ -29,6 +31,9 @@ jobs:
           -e WEB3_URL=$WEB3_URL
           -e WEB3_API_KEY=$WEB3_API_KEY
           -e SECRET_KEY=$SECRET_KEY
+          -e S3_ACCESS_KEY=$S3_ACCESS_KEY
+          -e S3_SECRET_KEY=$S3_SECRET_KEY
+          -e S3_REGION=us-east-2
           -p 8000:3000 --name apelance-container saikhnaa21/apelance
       - name: Cleanup unused images
         run: sudo docker image prune --force

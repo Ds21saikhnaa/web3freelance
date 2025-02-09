@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 // import { AcceptOfferModule } from './accept-offer/accept-offer.module';
 import { CategoryModule } from './category/category.module';
 import { ChatModule } from './chat/chat.module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ChatModule } from './chat/chat.module';
     // AcceptOfferModule,
     CategoryModule,
     ChatModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
