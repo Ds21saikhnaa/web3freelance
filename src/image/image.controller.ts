@@ -6,18 +6,22 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { UploadImageDto } from './dto/upload-image.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('image')
 export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
+  @ApiBearerAuth()
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
