@@ -47,6 +47,7 @@ export class ImageController {
     file: Express.Multer.File,
     @Query() { location }: UploadImageDto,
   ) {
-    return this.imageService.upload(file, location);
+    return;
+    // return this.imageService.upload(file, location);
   }
 }
