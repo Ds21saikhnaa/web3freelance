@@ -44,7 +44,8 @@ export class ImageService {
     return { imgUrl: Key };
   }
 
-  async uploadBase64(base64: string, userId: string) {
+  async uploadBase64(base64: string) {
+    const id = randomUUID();
     const Bucket = 'apelance';
     const matches = base64.match(/^data:(.+);base64,(.+)$/);
     if (!matches) {
@@ -55,7 +56,7 @@ export class ImageService {
     const base64Data = matches[2];
     const buffer = Buffer.from(base64Data, 'base64');
 
-    const key = `uploads/${userId}`;
+    const key = `uploads/${id}`;
     const params = {
       Bucket: Bucket,
       Key: key,
@@ -65,6 +66,6 @@ export class ImageService {
     };
 
     await this.s3.putObject(params);
-    return true;
+    return id;
   }
 }
