@@ -252,9 +252,6 @@ export class UsersService {
   }
 
   async syncNftAndBadges(sub: string) {
-    if (sub === '6783ceb6225a5af8de0485ae') {
-      return;
-    }
     const user = await this.me(sub);
     const fetchedNFTs = await this.getNfts(user.web3address);
     console.log(`${sub} user's nfts: `, fetchedNFTs);
