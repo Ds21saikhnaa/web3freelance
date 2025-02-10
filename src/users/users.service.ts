@@ -152,8 +152,8 @@ export class UsersService {
     try {
       const matches = profile.match(/^data:(.+);base64,(.+)$/);
       if (matches) {
-        await this.imageService.uploadBase64(profile, sub);
-        updateUserDto.profile = `https://d1mreutxek5buh.cloudfront.net/uploads/${sub}`;
+        const id = await this.imageService.uploadBase64(profile);
+        updateUserDto.profile = `https://d1mreutxek5buh.cloudfront.net/uploads/${id}`;
       }
       const user = await this.me(sub);
       Object.assign(user, updateUserDto);
