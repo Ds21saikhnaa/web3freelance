@@ -41,12 +41,12 @@ export class UsersController {
     return this.usersService.me(sub);
   }
 
-  // @ApiBearerAuth()
+  @ApiBearerAuth()
   @Patch('')
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   update(@Request() req: any, @Body() updateUserDto: UpdateUserDto) {
-    // const { sub } = req.user;
-    return this.usersService.update('67a9eafe074de19ac3e97ad9', updateUserDto);
+    const { sub } = req.user;
+    return this.usersService.update(sub, updateUserDto);
   }
 
   @ApiBearerAuth()
