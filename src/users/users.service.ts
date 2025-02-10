@@ -18,6 +18,7 @@ import { lastValueFrom } from 'rxjs';
 import { Cron } from '@nestjs/schedule';
 import { NftContractAddress, NftContractAddressWithBadge } from './enum';
 import { ReviewDto } from './dto/create-user.dto';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +32,7 @@ export class UsersService {
     @InjectModel(Job.name)
     private jobModel: Model<Job>,
     private readonly httpService: HttpService,
+    private readonly imageService: ImageService,
   ) {}
 
   async login(web3address: string) {
@@ -146,10 +148,20 @@ export class UsersService {
   }
 
   async update(sub: string, updateUserDto: UpdateUserDto) {
-    const user = await this.me(sub);
-    Object.assign(user, updateUserDto);
-    await user.save();
-    return user;
+    const { profile } = updateUserDto;
+    try {
+      const matches = profile.match(/^data:(.+);base64,(.+)$/);
+      if (matches) {
+        await this.imageService.uploadBase64(profile, sub);
+        updateUserDto.profile = `https://d1mreutxek5buh.cloudfront.net/uploads/${sub}`;
+      }
+      const user = await this.me(sub);
+      Object.assign(user, updateUserDto);
+      await user.save();
+      return user;
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
   async updateRating(sub: string) {

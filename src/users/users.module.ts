@@ -10,6 +10,7 @@ import {
 import { Job, JobSchema } from '../jobs/entities/jobs.entity';
 import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ImageModule } from '../image/image.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       },
     ]),
     HttpModule,
+    ImageModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

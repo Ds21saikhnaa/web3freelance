@@ -43,4 +43,28 @@ export class ImageService {
     await this.s3.putObject({ Bucket, Key, Body });
     return { imgUrl: Key };
   }
+
+  async uploadBase64(base64: string, userId: string) {
+    const Bucket = 'apelance';
+    const matches = base64.match(/^data:(.+);base64,(.+)$/);
+    if (!matches) {
+      throw new Error('Invalid base64 format');
+    }
+
+    const mimeType = matches[1];
+    const base64Data = matches[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    const key = `uploads/${userId}`;
+    const params = {
+      Bucket: Bucket,
+      Key: key,
+      Body: buffer,
+      ContentEncoding: 'base64',
+      ContentType: mimeType,
+    };
+
+    await this.s3.putObject(params);
+    return true;
+  }
 }
