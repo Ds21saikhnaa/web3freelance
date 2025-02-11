@@ -16,13 +16,24 @@ import { Job } from '../jobs/entities/jobs.entity';
 import { JobStatus } from '../jobs/enum';
 import { lastValueFrom } from 'rxjs';
 import { Cron } from '@nestjs/schedule';
-import { NftContractAddress, NftContractAddressWithBadge } from './enum';
+import {
+  NftContractAddress,
+  NftContractAddressETH,
+  NftContractAddressWithBadge,
+} from './enum';
 import { ReviewDto } from './dto/create-user.dto';
 import { ImageService } from '../image/image.service';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
+  private provider: ethers.Provider;
+  private contract: ethers.Contract;
+  private nftABI = [
+    'function balanceOf(address owner) view returns (uint256)',
+    'function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)',
+  ];
 
   constructor(
     @InjectModel(User.name)
@@ -33,7 +44,54 @@ export class UsersService {
     private jobModel: Model<Job>,
     private readonly httpService: HttpService,
     private readonly imageService: ImageService,
-  ) {}
+  ) {
+    this.provider = new ethers.JsonRpcProvider('https://rpc.apechain.com');
+    this.contract = new ethers.Contract(
+      '0xB3A12aa155DCd85d7aeD8acb6347761a7C7ecf83',
+      this.nftABI,
+      this.provider,
+    );
+  }
+
+  private async fetchBalance(userAddress: string, contractAddress: string) {
+    try {
+      this.contract = new ethers.Contract(
+        contractAddress,
+        this.nftABI,
+        this.provider,
+      );
+      const balanceResponse = await this.provider.call({
+        to: contractAddress,
+        data: this.contract.interface.encodeFunctionData('balanceOf', [
+          userAddress,
+        ]),
+      });
+
+      if (balanceResponse === '0x') {
+        throw new Error('The contract did not return a valid balance.');
+      }
+
+      const balance = ethers.toNumber(balanceResponse);
+      return balance;
+    } catch (error) {
+      console.error('Error fetching balance:', error.message);
+      return null;
+    }
+  }
+
+  private async fetchUserNFTs(userAddress: string, contractAddress: string) {
+    if (!contractAddress) return false;
+    try {
+      const balance = await this.fetchBalance(userAddress, contractAddress);
+      if (balance !== null && balance > 0) {
+        return contractAddress;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error('Error in fetchUserNFTs:', error.message);
+    }
+  }
 
   async login(web3address: string) {
     const user = new this.userModel({ web3address });
@@ -253,16 +311,37 @@ export class UsersService {
 
   async syncNftAndBadges(sub: string) {
     const user = await this.me(sub);
+    const res = (
+      await Promise.allSettled(
+        NftContractAddress.map(async (el: string) => {
+          return await this.fetchUserNFTs(user.web3address, el);
+        }),
+      )
+    )
+      .filter(
+        (result): result is PromiseFulfilledResult<string | false> =>
+          result.status === 'fulfilled',
+      )
+      .map((result) => result.value)
+      .filter((isHave): isHave is string => !!isHave);
+    let badges: string[] = Array.from(
+      new Set(
+        res
+          .map((el) => NftContractAddressWithBadge[el])
+          .filter((badge): badge is string => !!badge), // Filter and assert type
+      ),
+    );
+
     const fetchedNFTs = await this.getNfts(user.web3address);
     console.log(`${sub} user's nfts: `, fetchedNFTs);
     if (fetchedNFTs?.ownedNfts?.length) {
-      const badges: string[] = Array.from(
-        new Set(
-          fetchedNFTs.ownedNfts
-            .map((el) => NftContractAddressWithBadge[el?.contract?.address])
-            .filter((badge): badge is string => !!badge), // Filter and assert type
-        ),
-      );
+      const fetchedBadges = fetchedNFTs.ownedNfts
+        .map((el) => el?.contract?.address)
+        .map((address) => NftContractAddressWithBadge[address])
+        .filter((badge): badge is string => !!badge);
+      badges = Array.from(new Set([...badges, ...fetchedBadges]));
+    }
+    if (badges !== user.all_badges) {
       user.all_badges = badges;
       user.lastSynced = new Date();
       await user.save();
@@ -294,7 +373,7 @@ export class UsersService {
     const url = `${process.env.WEB3_URL}/nft/v3/${process.env.WEB3_API_KEY}/getNFTsForOwner`;
     const params = {
       owner: walletAddress,
-      contractAddresses: NftContractAddress,
+      contractAddresses: NftContractAddressETH,
       withMetadata: true,
       pageSize: 100,
     };
@@ -302,6 +381,7 @@ export class UsersService {
     return result.data;
   }
 
+  // @Cron('*/1 * * * *')
   @Cron('0 0 * * *')
   async handleMidnightTask() {
     this.logger.log('Running the midnight sync job');
@@ -309,7 +389,7 @@ export class UsersService {
     const users = await this.userModel.find();
     for (const user of users) {
       await this.syncNftAndBadges(user._id);
-      await this.delay(5000);
+      await this.delay(10000);
       // await this.delay(30000);
     }
 
