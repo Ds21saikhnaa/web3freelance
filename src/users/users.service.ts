@@ -208,7 +208,10 @@ export class UsersService {
   async update(sub: string, updateUserDto: UpdateUserDto) {
     const { profile } = updateUserDto;
     try {
-      const matches = profile.match(/^data:(.+);base64,(.+)$/);
+      let matches = null;
+      if (profile) {
+        matches = profile.match(/^data:(.+);base64,(.+)$/);
+      }
       if (matches) {
         const id = await this.imageService.uploadBase64(profile);
         updateUserDto.profile = `https://d1mreutxek5buh.cloudfront.net/uploads/${id}`;
